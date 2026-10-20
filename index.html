@@ -1,0 +1,2282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A kid-friendly interactive fairy tale adventure in two books, with a hiccupping bookworm guide.">
+<meta name="theme-color" content="#EDF4EF">
+<title>Pip and the Missing Endings</title>
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600;700&display=swap">
+<style>
+/* Layout: one calm column. Sticky HUD on top, one beat of story in a big card, sticky action bar at the bottom. Each world re-tints the accent through --h. */
+:root{
+  --font-display:'Fredoka','Trebuchet MS',system-ui,sans-serif;
+  --font-body:'Atkinson Hyperlegible','Segoe UI',system-ui,sans-serif;
+  --fs:26px; --h:190;
+  --bg:#EDF4EF; --surface:#FFFFFF; --ink:#16213A; --muted:#4D5C77; --line:#C5D4CB;
+  --accent:hsl(var(--h) 62% 26%); --on-accent:#FFFFFF; --soft:hsl(var(--h) 45% 90%);
+  --heart:#C62839; --coin:#A86A0A; --star:#B07A00; --good:#176B38; --bad:#A31F30;
+  --toast-bg:#FFF1B8; --toast-ink:#2B2200; --toast-line:#C9A227; --banner-filter:none;
+}
+:root[data-world="wood"]{--h:132}
+:root[data-world="road"]{--h:34}
+:root[data-world="castle"]{--h:338}
+:root[data-world="dark"]{--h:266}
+:root[data-world="tower"]{--h:232}
+:root[data-world="bean"]{--h:200}
+:root[data-world="ball"]{--h:296}
+:root[data-world="pigs"]{--h:18}
+:root[data-world="name"]{--h:84}
+:root[data-world="mix"]{--h:160}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1630; --surface:#17224A; --ink:#F2F5FF; --muted:#B4BEDC; --line:#2D3C70;
+    --accent:hsl(var(--h) 80% 72%); --on-accent:#0E1630; --soft:hsl(var(--h) 38% 21%);
+    --heart:#FF6B7D; --coin:#F2B84B; --star:#FFD166; --good:#7EE2A2; --bad:#FFA3AE;
+    --toast-bg:#3A3010; --toast-ink:#FFF6D0; --toast-line:#B8962E; --banner-filter:brightness(.8);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1630; --surface:#17224A; --ink:#F2F5FF; --muted:#B4BEDC; --line:#2D3C70;
+  --accent:hsl(var(--h) 80% 72%); --on-accent:#0E1630; --soft:hsl(var(--h) 38% 21%);
+  --heart:#FF6B7D; --coin:#F2B84B; --star:#FFD166; --good:#7EE2A2; --bad:#FFA3AE;
+  --toast-bg:#3A3010; --toast-ink:#FFF6D0; --toast-line:#B8962E; --banner-filter:brightness(.8);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:18px;line-height:1.45;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:25}
+button{font-family:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible{outline:4px solid var(--accent);outline-offset:3px}
+svg.ic{width:1.1em;height:1.1em;flex:none;vertical-align:-0.15em}
+.wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.screen{padding-block:8px 24px;display:flex;flex-direction:column;min-height:calc(100vh - 80px)}
+
+/* HUD */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding-block:10px;border-bottom:2px solid var(--line)}
+.hearts{display:flex;gap:2px;color:var(--heart);font-size:28px}
+.stat{display:flex;align-items:center;gap:6px;font:700 22px var(--font-display);font-variant-numeric:tabular-nums}
+.stat.coin{color:var(--coin)} .stat.star{color:var(--star)}
+.stat span{color:var(--ink)}
+.grow{flex:1}
+.menu-btn{margin-left:auto;display:flex;align-items:center;gap:8px;min-height:48px;padding:0 16px;border-radius:16px;border:3px solid var(--accent);background:var(--surface);font:700 20px var(--font-display)}
+
+/* Title + name screens */
+.title-art{border-radius:26px;overflow:hidden;margin-top:6px;height:clamp(170px,38vw,240px)}
+.title-art svg,.banner svg{display:block;width:100%;height:100%;filter:var(--banner-filter)}
+.kicker{font:600 18px var(--font-display);letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:22px 0 0}
+h1{font:700 clamp(2.5rem,11vw,3.8rem)/1.02 var(--font-display);margin:8px 0 12px;text-wrap:balance}
+h2{font:700 1.6rem/1.15 var(--font-display);margin:0 0 10px;text-wrap:balance}
+.lede{font-size:22px;color:var(--muted);margin:0 0 22px;max-width:30ch}
+.stack{display:grid;gap:12px}
+.btn{min-height:66px;padding:12px 20px;border-radius:20px;border:3px solid var(--accent);background:var(--surface);color:var(--ink);font:700 calc(var(--fs)*.82) var(--font-display);text-align:left;display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%}
+.btn.primary{background:var(--accent);color:var(--on-accent)}
+.btn.small{min-height:56px;width:auto;font-size:21px;padding:8px 18px;justify-content:center}
+.btn:disabled{opacity:.55;cursor:not-allowed;border-style:dashed}
+.btn:active:not(:disabled){transform:translateY(2px)}
+.btn .sub{font:400 18px var(--font-body);opacity:.9}
+.fine{color:var(--muted);font-size:17px;margin:16px 0 0}
+label.fld{display:block;font:600 22px var(--font-display);margin:18px 0 8px}
+input[type=text]{width:100%;min-height:64px;border-radius:18px;border:3px solid var(--line);background:var(--surface);color:var(--ink);font:600 26px var(--font-body);padding:8px 18px}
+
+/* Game */
+.chap{font:600 17px var(--font-display);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:12px 0 0}
+.banner{border-radius:22px;overflow:hidden;height:clamp(104px,22vw,140px);margin-top:8px}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:26px;padding:20px 20px 22px;margin-top:14px;display:flex;flex-direction:column;gap:12px;min-height:190px;cursor:pointer;scroll-margin-top:72px}
+.spk{display:flex;align-items:center;gap:10px;font:700 22px var(--font-display);color:var(--accent)}
+.spk[hidden]{display:none!important}
+.av{width:46px;height:46px;border-radius:50%;background:var(--soft);display:grid;place-items:center;overflow:hidden;font:700 24px var(--font-display);color:var(--accent);flex:none}
+.av svg{width:100%;height:100%}
+.txt{font-size:var(--fs);line-height:1.5;margin:0}
+.fadein{animation:fi .28s ease-out}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:999px;background:var(--soft);font:700 19px var(--font-display);color:var(--ink)}
+.chip.good{color:var(--good)} .chip.bad{color:var(--bad)}
+.dots{display:flex;gap:8px;justify-content:center;margin-top:14px;min-height:12px}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.dot.on{background:var(--accent)}
+.actions{position:sticky;bottom:env(safe-area-inset-bottom,0px);display:grid;gap:12px;padding-block:14px 10px;margin-top:auto;background:linear-gradient(to top,var(--bg) 72%,transparent)}
+.navrow{display:flex;gap:12px}
+.navrow .btn.primary{flex:1;justify-content:center}
+.pill{font:700 17px var(--font-body);padding:3px 12px;border-radius:999px;background:var(--soft);color:var(--ink);white-space:nowrap;border:2px solid transparent}
+.btn.primary .pill{background:rgba(255,255,255,.2);color:var(--on-accent)}
+:root[data-theme="dark"] .btn.primary .pill{background:rgba(0,0,0,.15)}
+.pill.low{border-color:var(--bad)}
+.pill.ready{border-color:var(--good)}
+.choice{flex-wrap:wrap;justify-content:flex-start}
+.choice .lab{flex:1 1 60%;min-width:0}
+
+/* Toasts: parked over the picture, never over the words or buttons */
+#toasts{position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 82px);z-index:30;display:grid;justify-items:center;gap:8px;pointer-events:none;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
+.toast{pointer-events:auto;width:100%;max-width:560px;background:var(--toast-bg);color:var(--toast-ink);border:3px solid var(--toast-line);border-radius:20px;padding:10px 14px 14px;display:grid;grid-template-columns:auto 1fr;gap:4px 12px;align-items:center;box-shadow:0 6px 18px rgba(0,0,0,.25);animation:drop .35s ease-out;position:relative;overflow:hidden;cursor:pointer}
+.toast .ti{grid-row:1/3;font-size:34px;color:var(--toast-line);display:grid}
+.toast b{font:700 20px var(--font-display);line-height:1.15}
+.toast i{font-style:normal;font-size:18px;line-height:1.3}
+.toast .tag{font:600 13px var(--font-display);letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.toast .bar{position:absolute;left:0;bottom:0;height:5px;background:var(--toast-line);width:100%;animation:bar linear forwards}
+.toast.out{animation:out .35s ease-in forwards}
+@keyframes drop{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
+@keyframes out{to{opacity:0;transform:translateY(-12px)}}
+@keyframes bar{from{width:100%}to{width:0}}
+
+/* Menu sheet */
+.sheet{position:fixed;inset:0;z-index:40;background:var(--bg);overflow-y:auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet .wrap{padding-block:14px 40px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 18px}
+.tab{min-height:56px;border-radius:16px;border:3px solid var(--line);background:var(--surface);font:700 20px var(--font-display)}
+.tab[aria-selected="true"]{border-color:var(--accent);background:var(--accent);color:var(--on-accent)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:2px solid var(--line);font:600 22px var(--font-display)}
+.row .meta{font:400 18px var(--font-body);color:var(--muted)}
+.pips{display:flex;gap:6px}
+.pip{width:22px;height:22px;border-radius:7px;background:var(--line)}
+.pip.on{background:var(--accent)}
+.tro{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;padding:14px 0;border-bottom:2px solid var(--line);align-items:center}
+.tro .ti{grid-row:1/3;font-size:34px;color:var(--star)}
+.tro.lock .ti{color:var(--line)}
+.tro b{font:700 21px var(--font-display)}
+.tro span{color:var(--muted);font-size:18px}
+.seg{display:flex;gap:10px}
+.seg .btn{justify-content:center;width:auto;min-width:64px}
+.warn{color:var(--bad);font-weight:700}
+.endbox{background:var(--soft);border-radius:22px;padding:16px 18px;font:600 22px var(--font-display)}
+
+@media (prefers-reduced-motion: reduce){
+  .fadein,.toast,.toast.out{animation:none}
+  .toast .bar{animation-duration:0s}
+}
+.actions.flow{position:static;background:none;padding-block:16px 8px}
+#game.choosing .banner{height:76px}
+@media (max-width:430px){.hud{gap:6px}.stat{font-size:18px;gap:4px}.hearts{font-size:20px;gap:1px}.menu-btn{min-height:44px;padding:0 10px;font-size:18px;gap:6px;border-width:2px}}
+</style>
+</head>
+<body>
+<noscript><p style="padding:24px;font:20px sans-serif">This story needs JavaScript turned on to play.</p></noscript>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-heart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21s-7.6-4.7-9.7-9.3C.8 8.3 2.9 4.4 6.7 4.4c2 0 3.8 1.1 5.3 3 1.5-1.9 3.300-3 5.300-3 3.800 0 5.900 3.900 4.400 7.300C19.600 16.300 12 21 12 21z"/></symbol>
+  <symbol id="i-heart0" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" d="M12 21s-7.6-4.7-9.7-9.3C.8 8.3 2.9 4.4 6.7 4.4c2 0 3.8 1.1 5.3 3 1.5-1.9 3.300-3 5.300-3 3.800 0 5.900 3.900 4.400 7.300C19.600 16.300 12 21 12 21z"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="currentColor"/><circle cx="12" cy="12" r="6.500" fill="none" stroke="var(--surface)" stroke-width="2"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2l3.100 6.600 7.200.9-5.300 5 1.400 7.100L12 18l-6.400 3.600L7 14.500 1.700 9.500l7.200-.9z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/></symbol>
+  <symbol id="i-cup" viewBox="0 0 24 24"><path d="M7 3h10v6a5 5 0 0 1-10 0V3z" fill="currentColor"/><path d="M7 5H3.500v1.500A4 4 0 0 0 7.500 10.500M17 5h3.500v1.500a4 4 0 0 1-4 4M12 14.500V18M8 21h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M6 12h12M13 6l6 6-6 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M18 12H6M11 6l-6 6 6 6" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round" fill="none"/></symbol>
+  <symbol id="pip" viewBox="0 0 64 64">
+    <circle cx="9" cy="52" r="7" fill="#9BDD84" stroke="#2E6B34" stroke-width="2.500"/>
+    <circle cx="21" cy="46" r="11" fill="#8AD474" stroke="#2E6B34" stroke-width="2.500"/>
+    <circle cx="41" cy="30" r="17" fill="#7BCB66" stroke="#2E6B34" stroke-width="2.500"/>
+    <circle cx="34" cy="27" r="5.500" fill="#fff" stroke="#2E6B34" stroke-width="1.500"/><circle cx="35" cy="28" r="2.500" fill="#16213A"/>
+    <circle cx="49" cy="27" r="7.500" fill="#fff" stroke="#D9A21B" stroke-width="2.500"/><circle cx="50" cy="28" r="3" fill="#16213A"/>
+    <path d="M56 33l4 12" stroke="#D9A21B" stroke-width="2" fill="none"/>
+    <path d="M34 39q8 7 16 0" stroke="#2E6B34" stroke-width="2.500" fill="none" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<div id="toasts" aria-live="polite"></div>
+
+<div id="app" class="wrap">
+  <header id="hud" class="hud" hidden>
+    <div id="hearts" class="hearts" role="img" aria-label="Hearts"></div>
+    <div class="stat coin" title="Coins"><svg class="ic"><use href="#i-coin"/></svg><span id="coins">0</span></div>
+    <div class="stat star" title="Story Stars"><svg class="ic"><use href="#i-star"/></svg><span id="stars">0/4</span></div>
+    <div class="grow"></div>
+    <button id="menuBtn" class="menu-btn" type="button"><svg class="ic"><use href="#i-menu"/></svg>Menu</button>
+  </header>
+
+  <section id="title" class="screen">
+    <div id="titleArt" class="title-art" aria-hidden="true"></div>
+    <p class="kicker">A story adventure · Books One and Two</p>
+    <h1>Pip and the Missing Endings</h1>
+    <p class="lede">Fairy tales are losing their endings. A very hungry bookworm needs your help.</p>
+    <div class="stack">
+      <button id="btnContinue" class="btn primary" type="button" hidden>Continue my adventure <svg class="ic"><use href="#i-next"/></svg></button>
+      <button id="btnNew" class="btn" type="button">New adventure <svg class="ic"><use href="#i-next"/></svg></button>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <span>Text size<br><span class="meta" id="tsLabel">Medium</span></span>
+      <span class="seg">
+        <button id="tsMinus" class="btn small" type="button" aria-label="Smaller text">A&minus;</button>
+        <button id="tsPlus" class="btn small" type="button" aria-label="Bigger text">A+</button>
+      </span>
+    </div>
+    <p class="fine">Your place is saved automatically. You can stop any time and come back.</p>
+  </section>
+
+  <section id="namescr" class="screen" hidden>
+    <p class="kicker">Before we begin</p>
+    <h2>What is your hero's name?</h2>
+    <label class="fld" for="nameInput">Type a name</label>
+    <input id="nameInput" type="text" maxlength="16" autocomplete="off" autocapitalize="words" placeholder="Your name here">
+    <div class="stack" style="margin-top:18px">
+      <button id="btnBegin" class="btn primary" type="button">Open the book <svg class="ic"><use href="#i-next"/></svg></button>
+      <button id="btnNameBack" class="btn small" type="button" style="width:100%"><svg class="ic"><use href="#i-back"/></svg> Back</button>
+    </div>
+    <p id="replaceWarn" class="fine warn" hidden>Starting a new adventure replaces your saved one.</p>
+  </section>
+
+  <section id="game" class="screen" hidden>
+    <div id="chap" class="chap"></div>
+    <div id="banner" class="banner" aria-hidden="true"></div>
+    <div id="card" class="card">
+      <div id="spk" class="spk" hidden></div>
+      <p id="txt" class="txt"></p>
+      <div id="chips" class="chips"></div>
+    </div>
+    <div id="dots" class="dots" aria-hidden="true"></div>
+    <div id="actions" class="actions"></div>
+  </section>
+</div>
+
+<div id="sheet" class="sheet" hidden role="dialog" aria-label="Menu">
+  <div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <h2 style="margin:0">Menu</h2>
+      <button id="sheetClose" class="menu-btn" type="button"><svg class="ic"><use href="#i-close"/></svg>Close</button>
+    </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" data-tab="hero" type="button">Hero</button>
+      <button class="tab" role="tab" data-tab="trophies" type="button">Trophies</button>
+      <button class="tab" role="tab" data-tab="settings" type="button">Settings</button>
+    </div>
+    <div id="sheetBody"></div>
+  </div>
+</div>
+<script>
+/* ---------- data helpers ---------- */
+var SC = {}, ACH = {}, ACHORDER = [];
+function sc(id, o) { SC[id] = o; }
+function ach(id, t, d) { ACH[id] = { t: t, d: d }; ACHORDER.push(id); }
+
+/* ---------- scene art: one little painted strip per world ---------- */
+var ART = (function () {
+  var o = 'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice"';
+  function grad(id, a, b) {
+    return '<linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient>';
+  }
+  function glow(id, c) {
+    return '<radialGradient id="' + id + '"><stop offset="0" stop-color="' + c + '" stop-opacity=".95"/><stop offset="1" stop-color="' + c + '" stop-opacity="0"/></radialGradient>';
+  }
+  function stars(list, c) {
+    return list.map(function (p) { return '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="' + p[2] + '" fill="' + c + '"/>'; }).join('');
+  }
+  var S1 = [[30, 20, 1.5], [80, 44, 1.2], [140, 16, 1.8], [190, 36, 1.2], [250, 14, 1.5], [350, 60, 1.4], [370, 22, 1.8], [60, 80, 1.2]];
+  var art = {};
+  art.attic = '<svg ' + o + '><defs>' + grad('ga', '#2B3A67', '#6B4F9A') + glow('gb', '#FFE9A0') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#ga)"/>' + stars(S1, '#FFF6D6') +
+    '<circle cx="320" cy="38" r="22" fill="#FFF3C8"/>' +
+    '<path d="M0 0h400v18L200 0 0 18z" fill="#1E2447"/><path d="M0 18L200 0l200 18" fill="none" stroke="#1E2447" stroke-width="6"/>' +
+    '<rect x="0" y="104" width="400" height="36" fill="#1E2447"/>' +
+    '<rect x="14" y="84" width="14" height="22" fill="#6D4C7D"/><rect x="30" y="78" width="12" height="28" fill="#4C6EA3"/><rect x="44" y="86" width="16" height="20" fill="#A35C5C"/>' +
+    '<rect x="340" y="80" width="14" height="26" fill="#4C6EA3"/><rect x="356" y="86" width="12" height="20" fill="#6D4C7D"/><rect x="370" y="76" width="16" height="30" fill="#A35C5C"/>' +
+    '<circle cx="200" cy="86" r="56" fill="url(#gb)"/>' +
+    '<path d="M170 96l30-8 30 8v-26l-30-8-30 8z" fill="#E8B33C" stroke="#8A5A12" stroke-width="3" stroke-linejoin="round"/><path d="M200 88V62" stroke="#8A5A12" stroke-width="3"/>' +
+    '<path d="M176 76l18-5M176 83l18-5M224 76l-18-5M224 83l-18-5" stroke="#FFF3C8" stroke-width="2" stroke-linecap="round"/></svg>';
+  art.wood = '<svg ' + o + '><defs>' + grad('gw', '#BDE5FF', '#EBF8CF') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#gw)"/><circle cx="330" cy="36" r="20" fill="#FFE27A"/>' +
+    '<path d="M0 90Q80 50 160 84T320 80T400 76V140H0z" fill="#8CCB7E"/><path d="M0 112Q100 86 200 108T400 100V140H0z" fill="#4F9D58"/>' +
+    '<rect x="50" y="64" width="9" height="46" fill="#6B4A2B"/><circle cx="54" cy="56" r="26" fill="#2F7D3E"/>' +
+    '<rect x="146" y="72" width="8" height="38" fill="#6B4A2B"/><circle cx="150" cy="66" r="20" fill="#3B9249"/>' +
+    '<rect x="296" y="60" width="10" height="52" fill="#6B4A2B"/><circle cx="301" cy="50" r="28" fill="#2F7D3E"/>' +
+    '<rect x="360" y="76" width="8" height="34" fill="#6B4A2B"/><circle cx="364" cy="70" r="18" fill="#3B9249"/>' +
+    '<path d="M196 56l70-24" stroke="#6B4A2B" stroke-width="3" stroke-linecap="round"/><path d="M266 32l-10 1 5 7z" fill="#555"/><path d="M196 56l-9-1 3-8M200 54l-9-1 3-8" stroke="#D83A3A" stroke-width="3" stroke-linecap="round" fill="none"/></svg>';
+  art.road = '<svg ' + o + '><defs>' + grad('gr', '#CFEFD0', '#FFF2AE') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#gr)"/>' +
+    '<path d="M0 96Q100 76 200 90T400 86V140H0z" fill="#7DC36E"/>' +
+    '<g fill="#2FA36B"><rect x="186" y="46" width="14" height="46"/><rect x="204" y="38" width="12" height="54"/><rect x="220" y="50" width="14" height="42"/><rect x="170" y="62" width="14" height="30"/><rect x="236" y="60" width="14" height="32"/></g>' +
+    '<g fill="#1F7A50"><path d="M186 46l7-14 7 14zM204 38l6-16 6 16zM220 50l7-12 7 12z"/></g>' +
+    '<path d="M150 140L270 140 220 92 208 92z" fill="#F2C230"/><path d="M178 140L238 140 218 108 210 108z" fill="#FFDD66"/>' +
+    '<g fill="#D7263D"><circle cx="40" cy="116" r="4"/><circle cx="66" cy="124" r="4"/><circle cx="96" cy="112" r="4"/><circle cx="318" cy="118" r="4"/><circle cx="350" cy="126" r="4"/><circle cx="378" cy="112" r="4"/></g>' +
+    '<circle cx="64" cy="30" r="16" fill="#FFF7C2"/></svg>';
+  art.castle = '<svg ' + o + '><defs>' + grad('gc', '#3B2A5C', '#F4A0AE') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#gc)"/><circle cx="336" cy="34" r="16" fill="#FFF1D6"/>' + stars(S1.slice(0, 5), '#FFF1D6') +
+    '<g fill="#2A1D3F"><rect x="130" y="62" width="140" height="62"/><rect x="116" y="42" width="30" height="82"/><rect x="254" y="42" width="30" height="82"/><rect x="180" y="34" width="40" height="90"/>' +
+    '<path d="M112 42l19-26 19 26zM250 42l19-26 19 26zM176 34l24-30 24 30z"/></g>' +
+    '<g fill="#FFD166"><rect x="126" y="60" width="8" height="12"/><rect x="266" y="60" width="8" height="12"/><rect x="196" y="52" width="8" height="14"/><rect x="196" y="82" width="8" height="14"/><rect x="150" y="82" width="8" height="12"/><rect x="242" y="82" width="8" height="12"/></g>' +
+    '<path d="M0 118Q100 100 200 116T400 110V140H0z" fill="#2C4A3A"/>' +
+    '<g fill="#E0405F"><circle cx="40" cy="120" r="7"/><circle cx="62" cy="126" r="6"/><circle cx="330" cy="124" r="7"/><circle cx="356" cy="120" r="6"/><circle cx="384" cy="127" r="7"/></g>' +
+    '<g fill="#1E3A2B"><circle cx="46" cy="116" r="3"/><circle cx="336" cy="120" r="3"/></g></svg>';
+  art.dark = '<svg ' + o + '><defs>' + grad('gd', '#150E30', '#33205E') + glow('gl', '#FFD36B') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#gd)"/>' + stars(S1.slice(0, 4), '#E9E2FF') +
+    '<g fill="#0B0720"><path d="M40 140V60q-10-10-24-8 14-2 20-16 4 12 16 16-6 8-2 20 8-14 20-18-6 12-4 26V140z"/><path d="M330 140V70q-12-8-26-4 16-2 22-18 6 14 20 18-8 6-4 20 10-12 24-14-8 10-6 28V140z"/><path d="M170 140V84q-8-6-18-4 12-2 16-12 4 10 14 12-4 6-2 14 6-8 16-10-4 8-2 20V140z"/></g>' +
+    '<circle cx="110" cy="76" r="30" fill="url(#gl)"/><circle cx="110" cy="76" r="5" fill="#FFD36B"/><path d="M110 60v8" stroke="#6B5B2E" stroke-width="2"/>' +
+    '<circle cx="262" cy="86" r="30" fill="url(#gl)"/><circle cx="262" cy="86" r="5" fill="#FFD36B"/><path d="M262 70v8" stroke="#6B5B2E" stroke-width="2"/>' +
+    '<g fill="#FFD36B"><circle cx="204" cy="60" r="3"/><circle cx="226" cy="44" r="2.500"/><circle cx="150" cy="110" r="2.500"/><circle cx="292" cy="112" r="3"/></g>' +
+    '<g fill="#FFE98A"><circle cx="352" cy="36" r="5"/><circle cx="368" cy="36" r="5"/></g>' +
+    '<rect y="122" width="400" height="18" fill="#0B0720"/></svg>';
+  art.tower = '<svg ' + o + '><defs>' + grad('gt', '#0A0E2A', '#2D2062') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#gt)"/>' + stars(S1, '#CFE0FF') +
+    '<g fill="#05061A"><rect x="178" y="30" width="44" height="110"/><path d="M172 30l28-30 28 30z"/><rect x="164" y="64" width="72" height="10"/></g>' +
+    '<g fill="#FFD36B"><rect x="194" y="44" width="12" height="14"/><rect x="194" y="90" width="12" height="14"/></g>' +
+    '<g fill="#05061A"><path d="M0 110q40-30 80-6t90 6q30 10 0 30H0z"/><path d="M400 100q-50-26-90 4t-90 8q-26 10 0 28h180z"/><circle cx="110" cy="84" r="12"/><circle cx="296" cy="82" r="10"/><circle cx="60" cy="96" r="6"/></g>' +
+    '<g fill="#FFFFFF"><circle cx="104" cy="82" r="3"/><circle cx="116" cy="82" r="3"/><circle cx="290" cy="80" r="2.500"/><circle cx="302" cy="80" r="2.500"/></g></svg>';
+  return art;
+})();
+/* ---------- trophies ---------- */
+ach('page_turner', 'Page Turner', 'You opened a book. Pip says that is technically just reading.');
+ach('hero_style', 'Hero Style', 'You picked a hero style. Pip approves. Pip approves of everything.');
+ach('nap_time', 'Nap Time!', 'Your hearts ran out, so you napped. Best trophy ever.');
+ach('shopper', 'Window Shopper', 'You spent coins on something shiny. Pip says shiny is the best flavor.');
+ach('pocket', 'Pocket Full of Shiny', 'You gathered 15 coins. Pip counted them twice, then a third time for fun.');
+ach('check8', 'Power Player', 'You passed 8 power checks. Your powers are showing off.');
+ach('w_bullseye', 'Bullseye-ish', 'You hit a target. It was a different target. Still counts!');
+ach('w_pie', 'Pie in the Sky', 'Your arrow landed in a blueberry pie. The pie was very surprised.');
+ach('w_soup', 'Seventh Bowl', 'You ate seven bowls of soup. Your tummy sends its regards.');
+ach('w_split', 'Split Decision', 'You split an arrow right down the middle. Robin forgot to blink.');
+ach('w_sheriff', 'Grumpy No More', 'You made the Sheriff laugh so hard his hat fell off.');
+ach('r_bricks', 'Brick by Brick', 'You walked the whole Yellow Road. Pip counted the bricks and lost count.');
+ach('r_straw', 'Straw Genius', 'You rescued the Scarecrow. He thanked you in three languages and made up a fourth.');
+ach('r_oil', 'Squeak No More', 'You oiled the Tin Woodman. His knees say thank you.');
+ach('r_roar', 'Squeaky Roar', 'The Lion roared. It came out as a squeak. It was the best squeak ever.');
+ach('r_wizard', 'Man Behind the Megaphone', 'You met the real Wizard. He is very nice and very sweaty.');
+ach('r_nap', 'Cloud Nine Nap', 'You helped the Witch take a nap. She snored in thunder.');
+ach('c_honk', 'Honk If You’re Hungry', 'The Goose Butler honked eleven times. You counted every one.');
+ach('c_rose', 'Gentle with the Roses', 'You watered a rose without squishing it. The roses clapped. Quietly.');
+ach('c_book', 'Bookworm Buddies', 'You shared a favorite book with the Beast. Pip nodded wisely.');
+ach('c_dance', 'Two Left Paws', 'You danced with the Beast. Nobody’s toes survived. Everyone had fun.');
+ach('c_smile', 'First Smile', 'The Beast smiled. It was a little scary and a lot sweet.');
+ach('d_tickle', 'Ticklish Trees', 'You tickled a tree. It giggled. Branches are very ticklish.');
+ach('d_owl', 'Who? You!', 'An owl asked who you were. You answered. The owl was thrilled.');
+ach('d_poet', 'Wolf Poet Society', 'You listened to a wolf’s poem. He cried happy tears into his scarf.');
+ach('d_crumb', 'Crumb’s Best Friend', 'You ate three gingerbread buddies. Sorry, gingerbread buddies.');
+ach('d_lantern', 'Lantern Lighter', 'You lit every lantern. The Darkwood is now just The Wood.');
+ach('all_stars', 'Star Collector', 'All four Story Stars! Pip wants to stick them on the fridge.');
+ach('t_team', 'Friends Show Up', 'Your story friends came to help. That is what story friends do.');
+ach('t_brave', 'Standing Tall', 'You stood up to a giant ink blot. Your knees knocked, but politely.');
+ach('t_wit', 'Pun-ishment', 'You out-punned an ink blot. He groaned and laughed at the same time.');
+ach('t_end', 'The Ending Writer', 'You gave the Blot a happy ending. Pip cried into a dictionary.');
+ach('e_end', 'The End (and a Beginning)', 'You finished the whole adventure! Pip is so proud he forgot to eat a word.');
+
+/* ---------- Chapter 1: the attic ---------- */
+sc('a1', { w: 'attic', ch: 'Chapter 1 · The Attic Book', t: [
+  'It is a rainy afternoon. You climb the creaky stairs to the attic.',
+  'Dust floats in the air like tiny sleepy fairies. Achoo!',
+  'Behind an old trunk, something is glowing. It is a big golden book.',
+  'The book is humming a tune. Books do not usually hum.'
+], c: [
+  { l: 'Open the glowing book', to: 'a2' },
+  { l: 'Say “Hello?” first', to: 'a1b' }
+] });
+sc('a1b', { w: 'attic', t: [
+  '“Hello?” you whisper. The book hums a little louder.',
+  'It sounds a bit like it said, “Finally!”'
+], n: 'a2' });
+sc('a2', { w: 'attic', fx: { ach: 'page_turner' }, t: [
+  'You open the cover. A tiny green head pops out of the page.',
+  'It wears a monocle. It is chewing on a word.',
+  '@Pip: Pardon me! I was snacking on “very.” Very is a very dull word. Yum.',
+  '@Pip: I am Pip, the Storybook Bookworm. You must be the new reader!'
+], n: 'a3' });
+sc('a3', { w: 'attic', t: [
+  'You tell Pip your name.',
+  '@Pip: {name}! What a splendid name. I would eat it, but I like you too much.',
+  '@Pip: {name}, I have terrible news.'
+], n: 'a4' });
+sc('a4', { w: 'attic', t: [
+  '@Pip: Someone is smudging out the endings of our stories! Page by page. Poof!',
+  '@Pip: Without endings, nobody gets their happily ever after.',
+  'You gasp. That is NOT okay.',
+  '@Pip: Will you help me fix them?'
+], c: [
+  { l: 'Yes! Let’s go!', to: 'a5' },
+  { l: 'Yes, but I need a snack first', to: 'a4b' }
+] });
+sc('a4b', { w: 'attic', t: [
+  '@Pip: A snack? Wonderful. Here, have a crunchy adjective.',
+  'You look at it. It says “sparkly.” You decide not to eat it.',
+  '@Pip: Suit yourself. More for me.'
+], n: 'a5' });
+sc('a5', { w: 'attic', t: [
+  '@Pip: A quick lesson before we go. It is easy, I promise.',
+  'See the hearts at the top of your screen? You have five.',
+  'If you bump into trouble, you lose a heart.',
+  'If they all run out, you just take a little nap and wake up fresh. No big deal!'
+], n: 'a6' });
+sc('a6', { w: 'attic', t: [
+  '@Pip: You also have three Powers: Courage, Kindness, and Wits.',
+  'Sometimes a choice shows a power, like “Courage 2.”',
+  'If your Courage is 2 or more, you succeed. If not, you lose a heart, and the story keeps going.',
+  '@Pip: Nothing scary happens. I would never allow it.'
+], n: 'a7' });
+sc('a7', { w: 'attic', t: [
+  '@Pip: Now the big question. What kind of hero are you?',
+  'Your choice gives that power a little boost.'
+], c: [
+  { l: 'Brave', to: 'a8', fx: { courage: 1, ach: 'hero_style' } },
+  { l: 'Kind', to: 'a8', fx: { kindness: 1, ach: 'hero_style' } },
+  { l: 'Clever', to: 'a8', fx: { wits: 1, ach: 'hero_style' } }
+] });
+sc('a8', { w: 'attic', t: [
+  '@Pip: Perfect! Hold on tight, {name}. Here comes the fun part.',
+  'Pip wiggles. The pages of the book start to flutter.',
+  'WHOOSH! The book swallows you up like a big, friendly sandwich.'
+], n: 'a9' });
+sc('a9', { w: 'attic', t: [
+  'You are tumbling through a swirl of words and colors.',
+  '@Pip: Try one! Each one uses a different power.',
+  '@Pip: Don’t worry. You can’t fail this one.'
+], c: [
+  { l: 'Hold on tight!', chk: ['courage', 1, 'a10', 'a10'], fx: { coins: 2 } },
+  { l: 'Giggle and wave', chk: ['kindness', 1, 'a10', 'a10'], fx: { coins: 2 } },
+  { l: 'Count the swirls', chk: ['wits', 1, 'a10', 'a10'], fx: { coins: 2 } }
+] });
+sc('a10', { w: 'attic', t: [
+  'Thump! You land on a soft purple rug.',
+  'Pip lands on your shoulder. He is still chewing.',
+  '@Pip: Nice landing! Look around. Welcome to the middle of every story.'
+], n: 'h' });
+
+/* ---------- the Hall of Doors (hub) ---------- */
+sc('h', { w: 'attic', ch: 'The Hall of Doors', fx: { heal: true }, t: [
+  ['!allstars', 'You are in the Hall of Doors. Four doors glow, each a different color.'],
+  ['!allstars', '@Pip: Each door is a story that lost its ending. Pick any door you like!'],
+  ['!allstars', '@Pip: I vote for the green one. It smells like soup.'],
+  ['allstars', 'All four Story Stars float above you. A fifth door appears, shining like gold.'],
+  ['allstars', '@Pip: The Tower of Unfinished Stories! That is where the Blot is hiding.'],
+  ['allstars', '@Pip: Are you ready, {name}? I think you are.']
+], c: [
+  { l: 'Green door: The Merry Greenwood', to: 'w1', if: '!wood_done' },
+  { l: 'Yellow door: The Yellow Road', to: 'r1', if: '!road_done' },
+  { l: 'Rose door: The Enchanted Castle', to: 'c1', if: '!castle_done' },
+  { l: 'Violet door: The Darkwood', to: 'd1', if: '!dark_done' },
+  { l: 'Golden door: The Tower', to: 't1', if: 'allstars' }
+] });
+
+/* ---------- Pip's pocket shop (after every finished story) ---------- */
+sc('hs', { w: 'attic', ch: 'Pip’s Pocket Shop', t: [
+  '@Pip: Shop time! I set up a tiny shop on this rug. I only sell things I found in the book.',
+  '@Pip: Everything costs coins. The coins are real. I bit one.',
+  '@Pip: Want something? Each one makes a power stronger.'
+], c: [
+  { l: 'Brave Cape: +1 Courage', cost: 6, to: 'h', fx: { courage: 1, ach: 'shopper' } },
+  { l: 'Kind Heart Button: +1 Kindness', cost: 6, to: 'h', fx: { kindness: 1, ach: 'shopper' } },
+  { l: 'Thinking Cap: +1 Wits', cost: 6, to: 'h', fx: { wits: 1, ach: 'shopper' } },
+  { l: 'No thanks, onward!', to: 'h' }
+] });
+/* ---------- Chapter 2: The Merry Greenwood ---------- */
+sc('w1', { w: 'wood', ch: 'Chapter 2 · The Merry Greenwood', t: [
+  'Boing! You land on soft green moss. Birds are singing. One bird is singing badly.',
+  'THWIP! An arrow zooms past your nose and sticks in a tree.',
+  '@Pip: I think that was a hello.'
+], c: [
+  { l: 'Wave and say “Hello!”', to: 'w2' },
+  { l: 'Duck behind Pip', to: 'w1b' }
+] });
+sc('w1b', { w: 'wood', t: [
+  '@Pip: Hey! I am a worm. I am a very small shield.',
+  'A cheerful laugh comes from above.'
+], n: 'w2' });
+sc('w2', { w: 'wood', t: [
+  'A man drops from a tree and lands in a bow. He wears a green hat with a feather.',
+  '@Robin: Well met, travelers! Robin Hood, at your service. Sorry about the arrow. I was aiming for a pinecone.',
+  '@Pip: He means it. That is his normal aim.',
+  '@Robin: Come, come! The Merry Men are making supper.'
+], n: 'w3' });
+sc('w3', { w: 'wood', t: [
+  'The Merry Men hide in a giant, cozy oak. It smells like soup and old socks.',
+  'Little John is huge and gentle. Maid Marian is clever and always has a plan. Friar Tuck stirs a giant pot.',
+  '@Marian: The Sheriff of Nottingham is holding an archery contest tomorrow. The prize is the Golden Arrow.',
+  '@Marian: And the last page of our story is hidden inside it!',
+  '@Pip: The Blot hid it! That sneaky smudge.',
+  '@Robin: We have one night to get ready. What will you do?'
+], c: [
+  { l: 'Help Friar Tuck cook', to: 'w4a' },
+  { l: 'Practice with Little John', to: 'w4b' },
+  { l: 'Ask Marian for tips', to: 'w4c' }
+] });
+
+sc('w4a', { w: 'wood', t: [
+  'You stir the soup with a spoon as long as your arm.',
+  '@Tuck: Taste it, taste it! Tell me the truth. Or tell me it is wonderful. Both are allowed.'
+], c: [
+  { l: 'Taste one spoonful', to: 'w4a2' },
+  { l: 'Eat seven bowls', to: 'w4a3' }
+] });
+sc('w4a2', { w: 'wood', fx: { kindness: 1, coins: 2 }, t: [
+  'It is delicious. You say so, and you add a kind tip: “Maybe a little more salt?”',
+  '@Tuck: Perfect! You are a born cook. Here, take these coins for your trouble.'
+], n: 'w5' });
+sc('w4a3', { w: 'wood', fx: { courage: 1, coins: 1, ach: 'w_soup' }, t: [
+  'You eat seven bowls. Friar Tuck weeps happy tears into the pot.',
+  'Your tummy is round as a drum. But you feel strong enough to lift a cow.'
+], n: 'w5' });
+
+sc('w4b', { w: 'wood', t: [
+  'Little John hands you a bow. It is tall. You are not.',
+  '@John: Hold it like a hug. A gentle hug.',
+  'The target is waiting. What now?'
+], c: [
+  { l: 'Shoot the big target', chk: ['courage', 2, 'w4b2', 'w4b3'] },
+  { l: 'Shoot the tiny target', chk: ['wits', 2, 'w4b4', 'w4b3'] },
+  { l: 'Ask John to show you', chk: ['kindness', 1, 'w4b5', 'w4b5'] }
+] });
+sc('w4b2', { w: 'wood', fx: { courage: 1, coins: 1, ach: 'w_bullseye' }, t: [
+  'Thwip! Your arrow hits the target dead center.',
+  'Little John cheers so loudly that three birds fall asleep.'
+], n: 'w5' });
+sc('w4b3', { w: 'wood', fx: { hp: -1, coins: 1, ach: 'w_pie' }, t: [
+  'Your arrow wobbles. It sails over the trees and lands in a blueberry pie.',
+  '@John: Nice shot! Wrong target, though.',
+  '@Pip: Somewhere, a picnic is very confused.'
+], n: 'w5' });
+sc('w4b4', { w: 'wood', fx: { wits: 1, coins: 1, ach: 'w_bullseye' }, t: [
+  'You feel the breeze. You count the leaves. Thwip!',
+  'Bullseye on the tiny target! Little John does a little dance, which shakes the whole forest.'
+], n: 'w5' });
+sc('w4b5', { w: 'wood', fx: { kindness: 1, coins: 2 }, t: [
+  'You ask John to show you. He beams, because nobody ever asks.',
+  '@John: Breathe out as you let go. And smile. Arrows can feel it.',
+  'He gives you a few coins for being such a good student.'
+], n: 'w5' });
+
+sc('w4c', { w: 'wood', t: [
+  'Marian draws a map in the dirt with a stick.',
+  '@Marian: The Sheriff always cheats a little. Keep your eyes open.',
+  '@Marian: Here is a riddle for luck. What has a head and a tail, but no body?'
+], c: [
+  { l: 'A coin!', to: 'w4c2' },
+  { l: 'A very confused snake', to: 'w4c3' }
+] });
+sc('w4c2', { w: 'wood', fx: { wits: 1, coins: 3 }, t: [
+  '@Marian: Correct! A coin. You have a sharp mind, {name}.',
+  'She flips you a coin, just to prove it.'
+], n: 'w5' });
+sc('w4c3', { w: 'wood', fx: { coins: 1 }, t: [
+  '@Marian: Close, and I love the snake. But the answer is a coin.',
+  'She tosses you one anyway.'
+], n: 'w5' });
+
+sc('w5', { w: 'wood', t: [
+  'Night falls. The stars come out like sugar on a cake.',
+  'You sleep in a hammock. Pip sleeps in your hat.',
+  'In the morning, a bugle goes TOOT! The contest is today!'
+], n: 'w5s' });
+sc('w5s', { w: 'wood', t: [
+  'On the way to the field, a little market stall sells good-luck charms.',
+  '@Pip: Ooh, shopping! Spend your coins on whatever you like.'
+], c: [
+  { l: 'Lucky Feather: +1 Courage', cost: 3, to: 'w6', fx: { courage: 1, ach: 'shopper' } },
+  { l: 'Owl Feather: +1 Wits', cost: 3, to: 'w6', fx: { wits: 1, ach: 'shopper' } },
+  { l: 'Warm Button: +1 Kindness', cost: 3, to: 'w6', fx: { kindness: 1, ach: 'shopper' } },
+  { l: 'No thanks, onward!', to: 'w6' }
+] });
+
+sc('w6', { w: 'wood', t: [
+  'The contest field is full of banners and snack carts. The crowd cheers.',
+  'The Sheriff of Nottingham sits on a throne that is too small. His hat is very, very tall.',
+  '@Sheriff: Welcome, welcome! Rules: hit the target. Also: I am the best. Also: no laughing.',
+  '@Pip: I like him already. Mostly the hat.',
+  'It is time for round one!'
+], c: [
+  { l: 'Shoot boldly', chk: ['courage', 2, 'w6s', 'w6f'] },
+  { l: 'Study the wind', chk: ['wits', 2, 'w6s', 'w6f'] },
+  { l: 'Cheer for the others first', chk: ['kindness', 2, 'w6s', 'w6f'] }
+] });
+sc('w6s', { w: 'wood', fx: { coins: 2 }, t: [
+  'Thwip! Your arrow lands in the target. The crowd goes WOOOO!',
+  'Someone throws a muffin into the air. It lands on the Sheriff’s hat.'
+], n: 'w7' });
+sc('w6f', { w: 'wood', fx: { hp: -1 }, t: [
+  'Your arrow misses and lands in a hay bale. A very annoyed chicken pops out.',
+  '@Sheriff: Everyone gets two tries today. I forgot to write the rule book.',
+  'Your second try works. Whew!'
+], n: 'w7' });
+
+sc('w7', { w: 'wood', t: [
+  'Final round! It is just you and the Sheriff.',
+  'The Golden Arrow shines on a pedestal. A black ink smudge wiggles on it.',
+  '@Sheriff: Ha! I shall shoot first.',
+  'THUNK! Dead center. He puffs out his chest. His belt pops open. Everyone gasps. He pretends it did not happen.',
+  '@Pip: Your turn, {name}. You can do this.'
+], c: [
+  { l: 'Split his arrow', chk: ['courage', 3, 'w7a', 'w7f'] },
+  { l: 'Ride the wind', chk: ['wits', 3, 'w7b', 'w7f'] },
+  { l: 'Tell him a joke', chk: ['kindness', 3, 'w7c', 'w7f'] }
+] });
+sc('w7a', { w: 'wood', fx: { coins: 3, ach: 'w_split' }, t: [
+  'You pull back the string. Thwip!',
+  'Your arrow splits his arrow right down the middle. Now there are TWO arrows!',
+  'The crowd goes wild. Robin forgets to blink.'
+], n: 'w8' });
+sc('w7b', { w: 'wood', fx: { coins: 3, wits: 1 }, t: [
+  'You lick a finger. The wind whispers a secret to you.',
+  'Thwip! Your arrow curls around a flag, loops once, and hits the center.',
+  '@Pip: Show-off. I love it.'
+], n: 'w8' });
+sc('w7c', { w: 'wood', fx: { coins: 3, ach: 'w_sheriff' }, t: [
+  'You tell him a joke. “Why did the arrow go to school? To get sharper!”',
+  'The Sheriff snorts. A tiny honk escapes his nose. He laughs so hard his tall hat falls off.',
+  'Then you shoot. Bullseye!'
+], n: 'w8' });
+sc('w7f', { w: 'wood', fx: { hp: -1 }, t: [
+  'Your arrow wobbles in the wind. Everyone ducks.',
+  'Plink! It bounces off the Sheriff’s tall hat.',
+  '@Sheriff: Ouch! My hat!',
+  'Robin quickly hands you a second arrow. This one lands in the center. Phew!'
+], n: 'w8' });
+
+sc('w8', { w: 'wood', t: [
+  '@Sheriff: Fine, fine. You win. Take the arrow. Take everything.',
+  'He slumps down. His big hat droops.',
+  '@Sheriff: Nobody ever invites me to the feasts. I only wanted a seat at the table.',
+  'Little ink smudges creep across his cheeks. The Blot smudged his happy page, too.',
+  '@Pip: Oh, the poor grump. What should we do?'
+], c: [
+  { l: 'Invite him to the feast', to: 'w9', fx: { kindness: 1, flag: 'wood_kind' } },
+  { l: 'Take the arrow and go', to: 'w9' }
+] });
+sc('w9', { w: 'wood', fx: { star: 'wood', flag: 'wood_done', coins: 3 }, t: [
+  'You pull the Golden Arrow out of its stand. It glows. A bright, shiny page pops out and flutters into your hands.',
+  ['wood_kind', 'The Merry Men hold a feast. The Sheriff sits at the head of the table, wearing a paper crown.'],
+  ['wood_kind', '@Sheriff: This is the best day of my life. Also, has anyone seen my hat?'],
+  ['!wood_kind', 'The Merry Men hold a feast. The Sheriff sits far away at first. Slowly, he scoots closer. Nobody says a word. Everybody smiles.'],
+  'The page writes its own ending: “And the Greenwood laughed happily ever after.”',
+  'A glowing Story Star floats up from the page. It is yours!',
+  '@Pip: One down, three to go!'
+], n: 'hs' });
+/* ---------- Chapter 3: The Yellow Road ---------- */
+sc('r1', { w: 'road', ch: 'Chapter 3 · The Yellow Road', t: [
+  'Plop! You land on a long road made of bright yellow bricks.',
+  'Far away, a green city sparkles like a pile of emeralds.',
+  '@Pip: The Emerald City! The Wizard lives there. He knows where the last page is.',
+  'A sign says EMERALD CITY, 3 HOPS. Another sign says THE SIGN ABOVE IS A LIAR.',
+  '@Pip: I do not trust signs.'
+], n: 'r2' });
+
+sc('r2', { w: 'road', t: [
+  'In a cornfield, a scarecrow hangs on a tall pole. He is waving at some crows.',
+  '@Scarecrow: Hello there! Could you help me down? I would do it myself, but I have no brain. Or so I am told.',
+  'His back is hooked on the very top of the pole. How will you get him down?'
+], c: [
+  { l: 'Climb up and unhook him', chk: ['courage', 2, 'r2a', 'r2f'] },
+  { l: 'Tip the pole with a lever', chk: ['wits', 2, 'r2a', 'r2f'] },
+  { l: 'Talk him calm so he wriggles free', chk: ['kindness', 2, 'r2a', 'r2f'] }
+] });
+sc('r2a', { w: 'road', fx: { wits: 1, ach: 'r_straw' }, t: [
+  'The Scarecrow flops gently to the ground.',
+  '@Scarecrow: Thank you! I just figured out why the road is yellow. Because it is the color yellow. Wow. Am I smart?',
+  '@Pip: Terribly.'
+], n: 'r3' });
+sc('r2f', { w: 'road', fx: { hp: -1 }, t: [
+  'The pole wobbles. The Scarecrow falls anyway and lands right on top of you.',
+  'Oof! But he is very soft. It is like being hugged by a pillow.',
+  '@Scarecrow: Thank you! I think!'
+], n: 'r3' });
+
+sc('r3', { w: 'road', t: [
+  'The road leads into a forest. Somewhere, something squeaks. Eeek. Eeek.',
+  'A tin man stands frozen with his axe in the air. His elbows are rusty.',
+  '@Tin Woodman: Mmmf... oil... can...',
+  'The oil can sits on a stump. A buzzing beehive sits right next to it.'
+], c: [
+  { l: 'Grab the oil can fast', chk: ['courage', 2, 'r3a', 'r3f'] },
+  { l: 'Lure the bees away with honey', chk: ['wits', 2, 'r3a', 'r3f'] },
+  { l: 'Ask the bees very politely', chk: ['kindness', 2, 'r3a', 'r3f'] }
+] });
+sc('r3a', { w: 'road', fx: { kindness: 1 }, t: [
+  'You oil his joints, one by one. Squeak, squeak... snap! He can move!',
+  'He hugs you very, very gently. His tin heart goes ding.'
+], n: 'r3b' });
+sc('r3f', { w: 'road', fx: { hp: -1 }, t: [
+  'The bees buzz! You run in circles. One bee gives you a tiny kiss on the nose.',
+  'Finally you grab the can and oil him up. Your nose is puffy, but he can move!'
+], n: 'r3b' });
+sc('r3b', { w: 'road', fx: { ach: 'r_oil' }, t: [
+  '@Tin Woodman: Thank you, friends. I am heading to see the Wizard. I wish to ask for a heart.',
+  '@Scarecrow: And I will ask for a brain!',
+  '@Pip: What if you each already have what you want?',
+  '@Tin Woodman: Preposterous. That would ruin the whole story.'
+], n: 'r4' });
+
+sc('r4', { w: 'road', t: [
+  'A roar shakes the trees. RAWR! Everyone freezes.',
+  'A big golden lion steps out. He sits down and starts to cry.',
+  '@Lion: I tried to roar at a mouse and it came out as a squeak. Listen. Eep!',
+  'Everyone tries very hard not to laugh.',
+  '@Lion: I am a lion who wants courage.'
+], c: [
+  { l: 'Cheer him on', chk: ['kindness', 2, 'r4a', 'r4f'] },
+  { l: 'Roar with him, side by side', chk: ['courage', 2, 'r4a', 'r4f'] },
+  { l: 'Teach him to roar into a bucket', chk: ['wits', 2, 'r4a', 'r4f'] }
+] });
+sc('r4a', { w: 'road', fx: { courage: 1 }, t: [
+  'You all roar together. The Lion takes a deep breath.',
+  '“RRRRRAAAAAWWWR!” Then, at the end, a tiny squeak. “...eep.”',
+  'Everyone cheers anyway. It was the best roar yet.'
+], n: 'r5' });
+sc('r4f', { w: 'road', fx: { hp: -1 }, t: [
+  'The Lion tries. “RRR... eep!” A bird falls out of a tree from surprise.',
+  'You catch it. It is fine. It is just offended.',
+  'Everyone claps for the effort.'
+], n: 'r5' });
+
+sc('r5', { w: 'road', fx: { ach: 'r_roar' }, t: [
+  'Four friends walk the Yellow Road: you, a Scarecrow, a Tin Woodman, and a Lion who sometimes squeaks.',
+  '@Pip: Bricks, bricks, bricks. I am counting every one. 4,000... 4,001...',
+  'You walk for a long time. Your feet say, “Hello, road.”'
+], n: 'r6' });
+
+sc('r6', { w: 'road', t: [
+  'You reach a field of bright red poppies. They smell like warm cookies and soft pillows.',
+  '@Pip: Oh no. Sleepy poppies. I feel a yawn coming on... *yaaawn*...',
+  'The Lion curls up. The Scarecrow starts to snore. Even Pip starts counting sheep.',
+  'Quick! Someone has to wake everybody up!'
+], c: [
+  { l: 'Hold your breath and carry everyone', chk: ['courage', 3, 'r6a', 'r6f'] },
+  { l: 'Sing a loud, silly song', chk: ['wits', 3, 'r6a', 'r6f'] },
+  { l: 'Wake friends with gentle hugs', chk: ['kindness', 3, 'r6a', 'r6f'] }
+] });
+sc('r6a', { w: 'road', fx: { coins: 3 }, t: [
+  'You do it! Everyone wakes up with a giant stretch.',
+  'The poppies sigh, disappointed, and go back to being flowers.',
+  '@Lion: I had the best dream. I was a lion. Wait, I am a lion.'
+], n: 'r7' });
+sc('r6f', { w: 'road', fx: { hp: -1 }, t: [
+  'You get a little sleepy yourself and doze off for a second.',
+  'A field mouse tickles your nose. Achoo! You wake up. Everyone else wakes up, too.',
+  'The Lion squeaks at the mouse. The mouse squeaks back. They get along.'
+], n: 'r7' });
+
+sc('r7', { w: 'road', t: [
+  'The gates of the Emerald City sparkle. A guard in a green hat hands you green glasses.',
+  '@Guard: Everyone must wear these. They keep the sparkle out of your eyes.',
+  'Everything is green. Even Pip. Even Pip’s monocle.',
+  '@Pip: I look fantastic.',
+  'The shops sell green hats, green pickles, and a green sandwich that looks suspicious.'
+], c: [
+  { l: 'Glittery Snack: +2 hearts', cost: 2, to: 'r8', fx: { hp: 2, ach: 'shopper' } },
+  { l: 'Emerald Cape: +1 Courage', cost: 4, to: 'r8', fx: { courage: 1, ach: 'shopper' } },
+  { l: 'Wise Spectacles: +1 Wits', cost: 4, to: 'r8', fx: { wits: 1, ach: 'shopper' } },
+  { l: 'Skip shopping, see the Wizard', to: 'r8' }
+] });
+
+sc('r8', { w: 'road', t: [
+  'The Wizard’s palace is huge. In a big, echoey room, a giant head floats in the air.',
+  '@Wizard: I AM OZ, THE GREAT AND TERRIBLE! SPEAK, MORTALS!',
+  'The Lion hides behind the Scarecrow. The Scarecrow hides behind Pip.',
+  '@Pip: I am a worm. I cannot hide anyone.',
+  '@Wizard: THE LAST PAGE IS WITH THE WITCH OF THE WEST. ASK HER FOR IT. ALSO BRING ME HER BROOM. MY FLOOR IS A MESS!',
+  'The head vanishes in a puff of smoke.'
+], n: 'r9' });
+
+sc('r9', { w: 'road', t: [
+  'The Witch’s castle sits on a gray hill. Dark clouds swirl above. Thunder grumbles like a very big tummy.',
+  'Suddenly, flap flap flap! Flying monkeys swoop down!',
+  'They snatch your hat, Pip’s monocle, and the Lion’s bow tie.',
+  '@Monkey: Ooh, hat! Mine!',
+  'They throw banana peels everywhere and giggle.'
+], c: [
+  { l: 'Chase them down', chk: ['courage', 3, 'r9a', 'r9f'] },
+  { l: 'Offer them a better game', chk: ['wits', 3, 'r9a', 'r9f'] },
+  { l: 'Ask politely for your things', chk: ['kindness', 3, 'r9a', 'r9f'] }
+] });
+sc('r9a', { w: 'road', fx: { coins: 2 }, t: [
+  'The monkeys hand everything back. Then they ask if you want to play tag.',
+  'You do. You lose. They are very, very fast.',
+  'They fly you right to the Witch’s front door.'
+], n: 'r10' });
+sc('r9f', { w: 'road', fx: { hp: -1 }, t: [
+  'You step on a banana peel. Whoa! You slide all the way up the hill.',
+  'You stop at the Witch’s front door. Pip is still holding on to your hat. Mostly.'
+], n: 'r10' });
+
+sc('r10', { w: 'road', t: [
+  'You knock on the big door. Nothing. You knock again.',
+  'A voice says, “GO AWAY! I am... achoo!... not home.”',
+  'The door opens. The Witch of the West stands there in fuzzy slippers and a big blanket. Her nose is bright red.',
+  '@Witch: I have a cold. I have not slept in nine days. The Blot smudged my last page, and now my bed keeps disappearing!',
+  '@Pip: Oh. She is not scary. She is sleepy.'
+], c: [
+  { l: 'Make her warm cocoa', chk: ['kindness', 3, 'r10a', 'r10f'] },
+  { l: 'Sing her a lullaby', chk: ['wits', 3, 'r10a', 'r10f'] },
+  { l: 'Hold the bed steady for her', chk: ['courage', 3, 'r10a', 'r10f'] }
+] });
+sc('r10f', { w: 'road', fx: { hp: -1 }, t: [
+  'You try, but the Witch sneezes. ACHOO! A gust of wind blows you into a haystack.',
+  'You are fine. The Witch feels terrible. She pours everyone tea and tries again.'
+], n: 'r10a' });
+sc('r10a', { w: 'road', fx: { coins: 3, ach: 'r_nap' }, t: [
+  'She snuggles into the bed. Within seconds, she is fast asleep.',
+  'Her snores sound like thunder. Rumble-rumble-ZZZ.',
+  'Her last page floats out of her pocket, shiny and clean. Her broom leans against the wall, ready to help.'
+], n: 'r11' });
+
+sc('r11', { w: 'road', fx: { ach: 'r_wizard' }, t: [
+  'Back in the Emerald City, the giant head appears again.',
+  '@Wizard: I AM OZ! HAVE YOU... oh. You have the broom. Thank you. Mind the floor.',
+  'Pip nibbles on a curtain. It falls. Behind it stands a small, nervous man with a megaphone and a very sweaty forehead.',
+  '@Wizard: Oh dear. You caught me. I am just a man with a megaphone.',
+  '@Lion: You are a fake? That is wonderful news. I feel better already.'
+], n: 'r12' });
+sc('r12', { w: 'road', fx: { star: 'road', flag: 'road_done', ach: 'r_bricks', coins: 3 }, t: [
+  '@Wizard: But I do have gifts! A diploma for the Scarecrow that says “Very Smart.”',
+  'A heart-shaped clock for the Tin Woodman that goes ding. And a medal for the Lion that says “BRAVE (MOSTLY).”',
+  'They look at their gifts and cry happy tears. The Tin Woodman rusts a little. You oil him again.',
+  '@Pip: I told you. They had it all along.',
+  'The last page glows. It writes: “And the Yellow Road led everyone home, wherever home was.”',
+  '@Pip: That was exactly 4,003 bricks. Oh no, I lost count again.',
+  'A glowing Story Star floats up from the page. It is yours!'
+], n: 'hs' });
+/* ---------- Chapter 4: The Enchanted Castle ---------- */
+sc('c1', { w: 'castle', ch: 'Chapter 4 · The Enchanted Castle', t: [
+  'A cold rain falls on a tall, crooked castle. Roses climb every wall, but each one is drooping.',
+  '@Pip: The castle of the Beast. They say he is gruff, grumpy, and very good at being alone.',
+  'The giant door creaks open by itself. HONK!',
+  'A goose in a tiny bow tie flaps up to you.'
+], c: [
+  { l: 'Say “Hello, goose!”', to: 'c2' },
+  { l: 'Hide behind Pip', to: 'c1b' }
+] });
+sc('c1b', { w: 'castle', t: [
+  '@Pip: I just told you. I am a worm. Not a bush.'
+], n: 'c2' });
+sc('c2', { w: 'castle', fx: { ach: 'c_honk' }, t: [
+  '@Honk: Honk! I am Butler Honk. Welcome, welcome, dripping guests. Please wipe your feet. And your wings. You have no wings? Honk.',
+  'Chef Whiskers the cat rolls in a cart of snacks. Sir Clank, a suit of armor, bows. Squeeeak.',
+  '@Clank: Apologies for the knee. It does that.',
+  '@Honk: Our master is cranky, and our roses are fading. The Blot smudged the last page of his story. Honk honk honk.'
+], n: 'c3' });
+sc('c3', { w: 'castle', t: [
+  'In the great hall, a kind young woman looks up from a tall stack of books. This is Beauty. She has read every book in the castle. Twice.',
+  '@Beauty: Welcome! Do not mind the Beast. He is not as scary as he sounds. Mostly.',
+  'A booming voice shakes the walls. “WHO IS IN MY CASTLE?!”',
+  'A huge furry Beast stomps in. He has big horns and a tiny pair of reading glasses.',
+  '@Beast: GO AWAY. Achoo! Excuse me. The roses make me sneeze.'
+], c: [
+  { l: 'Stand your ground and say hello', chk: ['courage', 2, 'c3a', 'c3f'] },
+  { l: 'Offer him a handkerchief', chk: ['kindness', 2, 'c3a', 'c3f'] },
+  { l: 'Joke about the tiny glasses', chk: ['wits', 2, 'c3a', 'c3f'] }
+] });
+sc('c3a', { w: 'castle', fx: { courage: 1, coins: 2 }, t: [
+  'The Beast blinks. Nobody has ever said hello without screaming.',
+  'His growl turns into a small cough.',
+  '@Beast: Hmph. Fine. You may stay. One night.'
+], n: 'c4' });
+sc('c3f', { w: 'castle', fx: { hp: -1, coins: 1 }, t: [
+  'The Beast roars “GO AWAY!” and your hair blows straight back. Pip tumbles off your shoulder.',
+  '@Beast: Oh no. Sorry. I did not mean to blow you away.',
+  'He picks Pip up very gently and puts him back.'
+], n: 'c4' });
+
+sc('c4', { w: 'castle', t: [
+  '@Beauty: Tonight the Beast wants a quiet dinner with guests. But he does not know how to be friendly.',
+  '@Beauty: Will you help?',
+  '@Honk: Honk! Pick a job!'
+], c: [
+  { l: 'Water the dying roses', to: 'c5a' },
+  { l: 'Help Chef Whiskers cook', to: 'c5b' },
+  { l: 'Find a book in the library', to: 'c5c' }
+] });
+
+sc('c5a', { w: 'castle', t: [
+  'The garden is full of drooping roses. Each one looks a little gray.',
+  '@Pip: They are tired. Like me. But with petals.'
+], c: [
+  { l: 'Water them gently', chk: ['kindness', 2, 'c5a2', 'c5a3'] },
+  { l: 'Pull the weeds fast', chk: ['courage', 2, 'c5a2', 'c5a3'] },
+  { l: 'Build a clever watering funnel', chk: ['wits', 2, 'c5a2', 'c5a3'] }
+] });
+sc('c5a2', { w: 'castle', fx: { kindness: 1, coins: 2, ach: 'c_rose' }, t: [
+  'The roses perk up. One blooms bright red and smells like strawberries.',
+  'It leans over and gives you a tiny rose-colored hug.'
+], n: 'c6' });
+sc('c5a3', { w: 'castle', fx: { hp: -1, coins: 1 }, t: [
+  'You water a little too hard. A rose squirts you in the face. Splash!',
+  'The rest of the garden laughs, which sounds like rustling leaves.'
+], n: 'c6' });
+
+sc('c5b', { w: 'castle', t: [
+  'The kitchen is chaos. Pots float. A spoon is stuck to the ceiling.',
+  '@Whiskers: Meow. I need help. The soup is not ready, and the spoon has opinions.'
+], c: [
+  { l: 'Stop the flying spoon', chk: ['courage', 2, 'c5b2', 'c5b3'] },
+  { l: 'Plan the menu', chk: ['wits', 2, 'c5b2', 'c5b3'] },
+  { l: 'Taste and encourage the chef', chk: ['kindness', 2, 'c5b2', 'c5b3'] }
+] });
+sc('c5b2', { w: 'castle', fx: { wits: 1, coins: 3 }, t: [
+  'Dinner smells wonderful. Chef Whiskers purrs so loudly that the pots rattle.',
+  'He hands you a handful of coins for your help.'
+], n: 'c6' });
+sc('c5b3', { w: 'castle', fx: { hp: -1, coins: 1 }, t: [
+  'The soup splashes and the spoon bonks you on the head. Boing!',
+  'But dinner is ready anyway. Chef Whiskers pats you with a paw.'
+], n: 'c6' });
+
+sc('c5c', { w: 'castle', t: [
+  'The library is enormous. It has ladders, rolling ladders, and a ladder for the ladders.',
+  '@Beauty: The Beast loves books, but he hides it. His favorite is about a lonely dragon. Can you find it?'
+], c: [
+  { l: 'Climb the tall shelves', chk: ['courage', 2, 'c5c2', 'c5c3'] },
+  { l: 'Search by the shelf labels', chk: ['wits', 2, 'c5c2', 'c5c3'] },
+  { l: 'Ask Beauty to search with you', chk: ['kindness', 2, 'c5c2', 'c5c3'] }
+] });
+sc('c5c2', { w: 'castle', fx: { wits: 1, coins: 2, ach: 'c_book' }, t: [
+  'You find it! The cover says The Dragon Who Was Very Lonely. There is a rose on the front.',
+  '@Beauty: He will love this. And he will pretend he does not.'
+], n: 'c6' });
+sc('c5c3', { w: 'castle', fx: { hp: -1, coins: 1, ach: 'c_book' }, t: [
+  'You tug a book and the whole shelf shakes. Books rain down like confetti!',
+  'The one you needed lands on your head. Perfect.'
+], n: 'c6' });
+
+sc('c6', { w: 'castle', t: [
+  'At sunset, a long table is set for dinner. There are candles, soup, and a goose with a napkin.',
+  'The Beast sits at the head of the table. He is so nervous that he squishes a spoon.',
+  '@Beast: I have never had a guest stay for dinner. Usually they run.',
+  '@Beauty: He is shy, you know.',
+  '@Beast: I am NOT SHY. ...A little shy.'
+], c: [
+  { l: 'Tell him a funny story', chk: ['wits', 2, 'c6a', 'c6f'] },
+  { l: 'Ask about his favorite book', chk: ['kindness', 2, 'c6a', 'c6f'] },
+  { l: 'Tell him a brave tale', chk: ['courage', 2, 'c6a', 'c6f'] }
+] });
+sc('c6a', { w: 'castle', fx: { kindness: 1, coins: 2 }, t: [
+  'The Beast’s ears perk up. He tells you all about his favorite book, with dramatic voices for every character.',
+  'The table laughs. The goose honks. Sir Clank squeaks.',
+  '@Pip: This is the best dinner I have ever had. I ate four tablecloths.'
+], n: 'c7' });
+sc('c6f', { w: 'castle', fx: { hp: -1 }, t: [
+  'The Beast thinks you are teasing him, and he sulks into a corner.',
+  'Beauty brings him back with a cookie. Everyone breathes again.'
+], n: 'c7' });
+
+sc('c7', { w: 'castle', t: [
+  'After dinner, the Beast gets up and bows, very stiffly.',
+  '@Beast: Would you... like to dance?',
+  'Soft music begins. It is very polite music.',
+  '@Pip: I think we should say yes.'
+], c: [
+  { l: 'Say yes and dance anyway', chk: ['courage', 2, 'c7a', 'c7a'] },
+  { l: 'Teach him the steps', chk: ['wits', 2, 'c7a', 'c7a'] },
+  { l: 'Laugh along when he steps on you', chk: ['kindness', 2, 'c7a', 'c7a'] }
+] });
+sc('c7a', { w: 'castle', fx: { coins: 2, ach: 'c_dance' }, t: [
+  'You dance. The Beast steps on your toe. Then on his own. Then on Sir Clank’s squeaky knee. SQUEEEAK!',
+  'Everybody ends up laughing. The Beast laughs, too, for the first time in forever.',
+  'It sounds like a happy bear.'
+], n: 'c8' });
+
+sc('c8', { w: 'castle', t: [
+  'At midnight, a cold wind blows. The last rose in the great hall starts losing its petals.',
+  'Black ink seeps in through the window like a slow, sad snake.',
+  '@Beast: The Blot! It is trying to smudge the last line of my story!',
+  '@Pip: Quick! Protect the rose!'
+], c: [
+  { l: 'Shield the rose with your coat', chk: ['courage', 3, 'c8a', 'c8f'] },
+  { l: 'Shut the windows with a plan', chk: ['wits', 3, 'c8a', 'c8f'] },
+  { l: 'Hum softly to the rose', chk: ['kindness', 3, 'c8a', 'c8f'] }
+] });
+sc('c8a', { w: 'castle', fx: { coins: 3 }, t: [
+  'You do it! The ink hisses, curls up, and slides back out the window.',
+  '@Pip: Boo! Go away, ink! Nobody likes you! ...Sorry. That was rude.'
+], n: 'c9' });
+sc('c8f', { w: 'castle', fx: { hp: -1 }, t: [
+  'Ink drips toward the rose. The Beast leaps in front of it and takes the splat himself.',
+  'He is covered in spots. He looks like a very surprised dalmatian.',
+  'Beauty hands him a cloth, and the ink wipes right off.'
+], n: 'c9' });
+
+sc('c9', { w: 'castle', t: [
+  'Beauty hands the Beast the last page. His paws shake.',
+  '@Beast: I am not sure how it ends.',
+  'Together, they read the ending out loud, in dramatic voices.',
+  'Pip nibbles the last ink smudges off the page. It tastes like blueberry.',
+  '@Pip: Delicious.'
+], n: 'c10' });
+sc('c10', { w: 'castle', fx: { star: 'castle', flag: 'castle_done', coins: 3, ach: 'c_smile' }, t: [
+  'The Beast smiles. A real one. It shows a lot of teeth and a lot of heart.',
+  'All the roses bloom at once. Petals drift through the whole castle. Honk sneezes. Clank squeaks. Chef Whiskers does a little dance.',
+  'The page writes: “And the castle was never lonely again.”',
+  'A glowing Story Star floats up. It is yours!',
+  '@Pip: Back to the Hall of Doors!'
+], n: 'hs' });
+/* ---------- Chapter 5: The Darkwood ---------- */
+sc('d1', { w: 'dark', ch: 'Chapter 5 · The Darkwood', t: [
+  'You step into a forest so dark that Pip tries to use his monocle as a flashlight. It does not work.',
+  'A sign says: DO NOT FEAR THE DARK. (WE ARE JUST SHY.)',
+  '@Pip: Those are the friendliest trees I have ever read about.',
+  'Pip hands you a small lantern. It is cold and unlit.',
+  '@Pip: The Blot smudged the Darkwood’s last page, and all the lights went out. We need to light three lanterns.'
+], n: 'd2' });
+
+sc('d2', { w: 'dark', t: [
+  'Psst... psst... hey, you...',
+  'The trees lean in close. They whisper, “We are scared of the dark, too.”',
+  'A tall, grumpy oak whispers, “Nobody ever tickles us.”',
+  '@Pip: They want to be tickled. Branches are very ticklish.'
+], c: [
+  { l: 'Tickle the branches', chk: ['kindness', 2, 'd2a', 'd2f'] },
+  { l: 'Tell them a story about sunshine', chk: ['wits', 2, 'd2a', 'd2f'] },
+  { l: 'Promise to protect them', chk: ['courage', 2, 'd2a', 'd2f'] }
+] });
+sc('d2a', { w: 'dark', fx: { coins: 2, ach: 'd_tickle' }, t: [
+  'The trees giggle. Leaves flutter like a thousand tiny claps.',
+  'A friendly firefly lands on your lantern. It glows! One lantern lit.'
+], n: 'd3' });
+sc('d2f', { w: 'dark', fx: { hp: -1, ach: 'd_tickle' }, t: [
+  'A branch tickles YOU instead. Hee hee! You laugh so hard you drop the lantern.',
+  'It lands on a squirrel. The squirrel lights up like a tiny sun. One lantern lit!'
+], n: 'd3' });
+
+sc('d3', { w: 'dark', t: [
+  'A girl in a red hood stomps up the path with a basket and a very big stick.',
+  '@Red: Halt! Who goes there? Are you with the wolf?',
+  '@Pip: We are with the worm. That is me.',
+  '@Red: Hmph. A wolf lives in this forest. He howls every night. I will protect everyone from him.',
+  '@Pip: Maybe he is just singing?'
+], c: [
+  { l: 'Go meet the wolf, politely', to: 'd4', fx: { kindness: 1 } },
+  { l: 'Ask Red to come along', to: 'd4', fx: { courage: 1, flag: 'red' } }
+] });
+
+sc('d4', { w: 'dark', t: [
+  'In a clearing, a big gray wolf sits on a log. He wears a long scarf and holds a tiny notebook.',
+  '@Wolfgang: Oh! Visitors. Hello. I am Wolfgang. Please do not scream.',
+  ['red', 'Red raises her stick, then slowly lowers it. “He has a scarf,” she whispers.'],
+  '@Wolfgang: I write poems. But every time I read one, everybody yells “WOLF!” and runs away.',
+  '@Pip: That is rude. Rude AND dramatic.'
+], c: [
+  { l: 'Ask him to read a poem', chk: ['kindness', 2, 'd4a', 'd4f'] },
+  { l: 'Offer to be his audience', chk: ['courage', 2, 'd4a', 'd4f'] },
+  { l: 'Suggest a better title', chk: ['wits', 2, 'd4a', 'd4f'] }
+] });
+sc('d4a', { w: 'dark', fx: { kindness: 1, coins: 2, flag: 'wolf', ach: 'd_poet' }, t: [
+  'He reads a short poem about the moon. It is surprisingly good.',
+  'Everyone claps. Even Red wipes her eye.',
+  '@Wolfgang: Nobody has ever clapped before.',
+  'His tail wags so happily that it glows. Your second lantern lights up!'
+], n: 'd5' });
+sc('d4f', { w: 'dark', fx: { hp: -1, flag: 'wolf', ach: 'd_poet' }, t: [
+  'He mishears you and thinks you wanted a howl. AWOOOOO! Every bird in the forest flies away.',
+  '@Wolfgang: Sorry! Did I do that?',
+  'You ask again, nicely. He reads the poem, and his glowing tail lights your second lantern.'
+], n: 'd5' });
+
+sc('d5', { w: 'dark', t: [
+  'Down a candy-colored path, you find a house made of gingerbread. It has a candy-cane fence and a gumdrop door.',
+  '@Pip: Do not eat the house. I know it is tempting.',
+  'A kind old lady opens the door. Her apron is covered in flour.',
+  '@Aunt Crumb: Oh! Customers! Or have you come to say I am a witch? Everyone says I am a witch.',
+  '@Aunt Crumb: I only bake. For friends. But nobody comes. They see the gingerbread and run.'
+], c: [
+  { l: 'Decorate cookies together', chk: ['wits', 2, 'd5a', 'd5f'] },
+  { l: 'Taste a cookie and cheer', chk: ['kindness', 2, 'd5a', 'd5f'] },
+  { l: 'Chase off a hungry raccoon', chk: ['courage', 2, 'd5a', 'd5f'] }
+] });
+sc('d5a', { w: 'dark', fx: { coins: 3, flag: 'crumb', ach: 'd_crumb' }, t: [
+  'The cookies come out perfect. You eat three gingerbread buddies. “Sorry, buddies,” you say.',
+  'Aunt Crumb giggles. She lights your third lantern with a spark from the oven.'
+], n: 'd6' });
+sc('d5f', { w: 'dark', fx: { hp: -1, coins: 1, flag: 'crumb', ach: 'd_crumb' }, t: [
+  'The cookies come out wonky. One looks like a squirrel. It seems to look back at you.',
+  'But they taste great. Aunt Crumb lights your third lantern with a spark from the oven.'
+], n: 'd6' });
+
+sc('d6', { w: 'dark', t: [
+  'Three lanterns glow in your hands. The path ends at an enormous oak, wider than a house.',
+  'Black ink drips down its bark. It is crying leaves.',
+  '@Great Oak: Hoo... I have lived here for a thousand years. I have never seen the stars.',
+  '@Pip: The Blot smudged the sky out of its page! We have to hang the lanterns high up.',
+  ['red', '@Red: I will hold the ladder. I once carried a basket up a mountain.'],
+  ['wolf', '@Wolfgang: I will compose an encouraging poem!'],
+  ['crumb', '@Aunt Crumb: And I brought snacks for the climb.']
+], c: [
+  { l: 'Climb up and hang them', chk: ['courage', 3, 'd6a', 'd6f'] },
+  { l: 'Build a pulley with your friends', chk: ['wits', 3, 'd6a', 'd6f'] },
+  { l: 'Ask the whole forest for help', chk: ['kindness', 3, 'd6a', 'd6f'] }
+] });
+sc('d6f', { w: 'dark', fx: { hp: -1 }, t: [
+  'Halfway up, the ladder wobbles. The lantern swings. Whoa!',
+  'Your friends catch you in a big, soft pile of leaves and snack crumbs.',
+  'You try again, and this time it works.'
+], n: 'd6a' });
+sc('d6a', { w: 'dark', fx: { coins: 3, ach: 'd_lantern' }, t: [
+  'One by one, the lanterns rise. Light spills through the branches and up into the night.',
+  'Stars appear. Hundreds of them! The Great Oak gasps.',
+  '@Great Oak: Oh... it is beautiful. Thank you.'
+], n: 'd7' });
+sc('d7', { w: 'dark', fx: { star: 'dark', flag: 'dark_done', coins: 3, ach: 'd_owl' }, t: [
+  'The Blot’s ink melts off the bark like fog in the morning. The Oak’s last page drifts down into your hands.',
+  'It writes: “And the Darkwood was never dark again. Not even a little. Except at bedtime.”',
+  'An owl lands on your shoulder. “Who?” he asks.',
+  '“You!” you answer. The owl is thrilled.',
+  'A glowing Story Star floats up. It is yours!',
+  '@Pip: Back to the Hall of Doors!'
+], n: 'hs' });
+/* ---------- Chapter 6: The Tower of Unfinished Stories ---------- */
+sc('t1', { w: 'tower', ch: 'Chapter 6 · The Tower of Unfinished Stories', t: [
+  'The golden door swings open without a sound. Four Story Stars float after you like loyal puppies.',
+  'Beyond it is a sea of black ink. In the middle, a tall tower leans against the sky.',
+  'Every window in the tower shows a story with a blank last page.',
+  '@Pip: The Tower of Unfinished Stories. The Blot lives at the very top.',
+  'Pip is shaking so hard that his monocle rattles.'
+], n: 't2' });
+sc('t2', { w: 'tower', fx: { ach: 't_team' }, t: [
+  'You are not alone. Your story friends come out of the ink fog, one by one.',
+  'Robin Hood, Little John, and Maid Marian run up with their bows. Friar Tuck brings soup.',
+  ['wood_kind', 'The Sheriff shows up, too, wearing his paper crown. “I brought snacks,” he says.'],
+  'The Scarecrow, the Tin Woodman, and the Lion walk the Yellow Road to you. The Lion roars. Only a small squeak. Everybody cheers.',
+  'Beauty and the Beast arrive, with Honk, Chef Whiskers, and Sir Clank squeaking behind them.',
+  'Red, Wolfgang, and Aunt Crumb come out of the woods. Wolfgang has written a battle poem.',
+  '@Pip: Friends! That is what story friends do.'
+], n: 't3' });
+
+sc('t3', { w: 'tower', t: [
+  'You climb the tower together. On the first floor is the Door of Doubt.',
+  'A voice whispers, “You are not brave enough.”',
+  '@Lion: Hey! That is MY line.'
+], c: [
+  { l: 'Say “Yes, I am!” and push', chk: ['courage', 3, 't3a', 't3f'] },
+  { l: 'Ask the door a clever question', chk: ['wits', 3, 't3a', 't3f'] },
+  { l: 'Tell the door it is okay to be scared', chk: ['kindness', 3, 't3a', 't3f'] }
+] });
+sc('t3a', { w: 'tower', fx: { coins: 2 }, t: [
+  'The door swings open. “Fine,” it grumbles. “You are brave enough.”'
+], n: 't4' });
+sc('t3f', { w: 'tower', fx: { hp: -1 }, t: [
+  'The door sticks. Everyone pushes together. Heave! Pop!',
+  'It opens, and the whole group falls through in a heap.'
+], n: 't4' });
+
+sc('t4', { w: 'tower', t: [
+  'The second floor is a maze of mixed-up words. The signs say things like LEFT IS RIGHT BUT ALSO MAYBE UP.',
+  '@Scarecrow: I think this is a riddle. Or a sandwich.'
+], c: [
+  { l: 'Follow the words that rhyme', chk: ['wits', 3, 't4a', 't4f'] },
+  { l: 'Hold hands so nobody gets lost', chk: ['kindness', 3, 't4a', 't4f'] },
+  { l: 'Charge straight through the middle', chk: ['courage', 3, 't4a', 't4f'] }
+] });
+sc('t4a', { w: 'tower', fx: { coins: 2 }, t: [
+  'You find the way out. The words rearrange into two big ones: WELL DONE.'
+], n: 't5' });
+sc('t4f', { w: 'tower', fx: { hp: -1 }, t: [
+  'You go in circles three times. On the fourth, Pip nibbles a hole in the wall.',
+  '@Pip: Problem solved. I am so smart. And a little full.'
+], n: 't5' });
+
+sc('t5', { w: 'tower', t: [
+  'The third floor is a hall of gloomy mirrors. They show a frowning version of you.',
+  '@Mirror: You are not good enough! ...Just kidding. I am practicing for my big scene.'
+], c: [
+  { l: 'Smile back at the mirror', chk: ['kindness', 3, 't5a', 't5f'] },
+  { l: 'Make a silly face', chk: ['wits', 3, 't5a', 't5f'] },
+  { l: 'Look it right in the eye', chk: ['courage', 3, 't5a', 't5f'] }
+] });
+sc('t5a', { w: 'tower', fx: { coins: 2 }, t: [
+  'The mirror grins. Then every mirror grins.',
+  '@Mirror: Fine. You are wonderful. Go on up.'
+], n: 't6' });
+sc('t5f', { w: 'tower', fx: { hp: -1 }, t: [
+  'The mirror sticks its tongue out. You stick yours out right back.',
+  'It is a tie. Everyone sneaks past while they are busy.'
+], n: 't6' });
+
+sc('t6', { w: 'tower', t: [
+  'At the very top, a huge black inkblot sits on a pile of unfinished pages.',
+  'It has two giant, sad eyes and a drippy sigh.',
+  '@Blot: Blurp.',
+  '@Blot: Go away. I am busy being sad.',
+  'A big ink tear rolls down and goes plop on the floor.'
+], n: 't7' });
+sc('t7', { w: 'tower', t: [
+  '@Blot: Everybody wants to fix all the stories. Nobody ever fixed mine.',
+  '@Blot: I am just a blot. A blot has no beginning, no middle, and no end. So I took everybody else’s.',
+  'Your friends gasp. Pip sniffles. Even the Lion cries a little.',
+  '@Pip: Oh, Blot.',
+  'What will you do, {name}?'
+], c: [
+  { l: 'Stand tall and tell him to stop', chk: ['courage', 3, 't9a', 't9f'] },
+  { l: 'Tell him a very good pun', chk: ['wits', 3, 't9b', 't9f'] },
+  { l: 'Ask what he wants for his story', chk: ['kindness', 3, 't9c', 't9f'] }
+] });
+sc('t9f', { w: 'tower', fx: { hp: -1 }, t: [
+  'The Blot sniffs and wobbles bigger, like a jiggly pudding.',
+  'Your friends step up in a circle around you. Everybody holds hands.',
+  '@Robin: Together, then.',
+  'You take a deep breath, and you ask the Blot what he wants.'
+], n: 't9c' });
+sc('t9a', { w: 'tower', fx: { ach: 't_brave' }, t: [
+  'You stand tall. Your knees knock, but politely.',
+  '“Please stop smudging the endings,” you say. “They belong to everyone.”',
+  'The Blot wobbles. “...Why can’t I have one, too?” he asks, in a very small voice.'
+], n: 't10' });
+sc('t9b', { w: 'tower', fx: { ach: 't_wit' }, t: [
+  'You clear your throat. “Why did the inkblot go to school? To learn to write a little better.”',
+  'The Blot groans. Then he snorts. Then he laughs, a big wobbly laugh that makes the whole tower jiggle.',
+  'Then he sniffles. “Nobody has ever made me laugh,” he says. “Now I want an ending, too.”'
+], n: 't10' });
+sc('t9c', { w: 'tower', fx: { kindness: 1 }, t: [
+  'You sit down in front of him. “What do you want for your story?” you ask.',
+  'The Blot is quiet for a long time.',
+  '@Blot: An ending. Mine. One where I am not the bad guy.'
+], n: 't10' });
+
+sc('t10', { w: 'tower', t: [
+  'The Blot sags. His giant eyes fill up.',
+  '@Blot: I only wanted somebody to finish my story. I did not know how.',
+  '@Pip: We do, Blot. We know exactly how.',
+  'Your friends gather around the pile of pages. Everybody grabs a pen. Even the Beast. Even the Lion. Even Pip, who holds one in his mouth.',
+  'How should the Blot’s story end?'
+], c: [
+  { l: '“He became the happiest dot in the book.”', to: 't12', fx: { flag: 'end_dot' } },
+  { l: '“He found a home inside every story.”', to: 't12', fx: { flag: 'end_home' } },
+  { l: '“He told the best joke at the end of every tale.”', to: 't12', fx: { flag: 'end_joke' } }
+] });
+sc('t12', { w: 'tower', fx: { ach: 't_end', coins: 5 }, t: [
+  'You all write the ending together. As the last word dries, the ink swirls into a shiny, perfect shape.',
+  ['end_dot', 'The Blot becomes a perfect little round dot, and he is the happiest dot in the whole book.'],
+  ['end_home', 'The Blot becomes the ink inside every page, helping each story say its last word.'],
+  ['end_joke', 'The Blot becomes the funny little twist at the end of every tale. He cannot wait to start.'],
+  '@Blot: Oh. Oh my. So this is what an ending feels like.',
+  'He gives a tiny, shiny wink. Then every smudged page flies up around him, and every last line is back where it belongs.'
+], n: 'e1' });
+
+sc('e1', { w: 'tower', t: [
+  'Light fills the tower. Every story in the Great Storybook shines, all the way to the last word.',
+  'Robin laughs. The Scarecrow gives a very long speech. The Lion roars: RAAAAWR! No squeak.',
+  'The Beast hugs Pip, who has to be un-hugged. Red and Wolfgang read a poem together.',
+  '@Pip: We did it, {name}.'
+], n: 'e2' });
+sc('e2', { w: 'attic', ch: 'The End', t: [
+  'The book glows, and you float up through the pages. Plop! You land on the soft, dusty attic rug.',
+  'The rain has stopped. A little rainbow peeks in through the window.',
+  'The golden book sits open in your lap. On the last page is a blank space and a note: “Your story goes here.”',
+  '@Pip: I think it is your turn to write one.'
+], n: 'e3' });
+sc('e3', { w: 'attic', fx: { ach: 'e_end', flag: 'game_done' }, t: [
+  'Pip pops out one more time. He is holding a tiny pen.',
+  '@Pip: Thank you, {name}. Every ending is better with a friend.',
+  '@Pip: And between you and me, I think this book has more pages. Plenty more.',
+  'Just then, Pip lets out a tiny hiccup. Hic!'
+], c: [
+  { l: 'Turn the page: Book Two', to: 'k1' },
+  { l: 'Close the book for now', to: 'e4' }
+] });
+sc('e4', { w: 'attic', ch: 'The End of Book One', t: [
+  'You close the golden book. It hums a happy little tune.',
+  'THE END OF BOOK ONE'
+], c: [
+  { l: 'Open Book Two', to: 'k1' },
+  { l: 'Back to the title', to: '__title' }
+] });
+/* ---------- Book Two: scene art ---------- */
+(function () {
+  var o = 'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 140" preserveAspectRatio="xMidYMid slice"';
+  function grad(id, a, b) {
+    return '<linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + a + '"/><stop offset="1" stop-color="' + b + '"/></linearGradient>';
+  }
+  function cloud(x, y, s) {
+    return '<g fill="#FFFFFF" opacity=".95"><ellipse cx="' + x + '" cy="' + y + '" rx="' + 34 * s + '" ry="' + 11 * s + '"/><ellipse cx="' + (x - 16 * s) + '" cy="' + (y - 8 * s) + '" rx="' + 18 * s + '" ry="' + 12 * s + '"/><ellipse cx="' + (x + 12 * s) + '" cy="' + (y - 10 * s) + '" rx="' + 20 * s + '" ry="' + 13 * s + '"/></g>';
+  }
+  ART.bean = '<svg ' + o + '><defs>' + grad('gbn', '#7FD3FF', '#F2FBFF') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#gbn)"/><circle cx="52" cy="32" r="18" fill="#FFE27A"/>' +
+    cloud(110, 100, 1.1) + cloud(330, 112, 1.2) + cloud(250, 38, .8) +
+    '<path d="M190 140C170 110 230 90 200 60S220 20 206 0" fill="none" stroke="#2F8F43" stroke-width="16" stroke-linecap="round"/>' +
+    '<g fill="#47B85A"><ellipse cx="172" cy="104" rx="22" ry="9" transform="rotate(-20 172 104)"/><ellipse cx="228" cy="82" rx="22" ry="9" transform="rotate(20 228 82)"/><ellipse cx="184" cy="52" rx="20" ry="8" transform="rotate(-25 184 52)"/><ellipse cx="226" cy="26" rx="18" ry="7" transform="rotate(20 226 26)"/></g>' +
+    '<g><rect x="296" y="60" width="64" height="44" fill="#F3D27A" stroke="#B8892B" stroke-width="3"/><path d="M290 60l38-28 38 28z" fill="#D97A4A" stroke="#9C4A24" stroke-width="3" stroke-linejoin="round"/><rect x="318" y="78" width="18" height="26" fill="#8A5A2B"/></g></svg>';
+  ART.ball = '<svg ' + o + '><defs>' + grad('gbl', '#1D1245', '#5A2D82') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#gbl)"/>' +
+    '<rect y="108" width="400" height="32" fill="#C9A7E8" opacity=".35"/>' +
+    '<g fill="#FFD36B"><circle cx="200" cy="20" r="5"/><circle cx="176" cy="30" r="4"/><circle cx="224" cy="30" r="4"/><circle cx="154" cy="42" r="3"/><circle cx="246" cy="42" r="3"/></g><path d="M200 0v18" stroke="#FFD36B" stroke-width="2"/>' +
+    '<circle cx="72" cy="58" r="34" fill="#FFF7E0" stroke="#D9A21B" stroke-width="5"/><path d="M72 58V34M72 58l-6-26" stroke="#2B1B4D" stroke-width="4" stroke-linecap="round"/><circle cx="72" cy="58" r="3" fill="#2B1B4D"/>' +
+    '<g fill="#10082B"><circle cx="190" cy="82" r="8"/><path d="M178 112l12-24 12 24z"/><circle cx="222" cy="84" r="8"/><path d="M212 112l10-22 14 22z"/><circle cx="296" cy="80" r="8"/><path d="M284 112l12-24 12 24z"/><circle cx="332" cy="84" r="8"/><path d="M322 112l10-22 14 22z"/></g>' +
+    '<g fill="#FF9BD8"><circle cx="270" cy="30" r="2"/><circle cx="350" cy="20" r="2.5"/><circle cx="130" cy="86" r="2"/><circle cx="380" cy="60" r="2"/></g></svg>';
+  ART.pigs = '<svg ' + o + '><defs>' + grad('gpg', '#CDEBFF', '#F7F3C8') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#gpg)"/>' + cloud(80, 30, .8) + cloud(310, 24, .9) +
+    '<path d="M0 100Q100 80 200 100T400 96V140H0z" fill="#8FCB7A"/>' +
+    '<g><rect x="40" y="70" width="64" height="44" fill="#E7C96A" stroke="#A8862B" stroke-width="3"/><path d="M32 70l40-30 40 30z" fill="#C9A23C" stroke="#A8862B" stroke-width="3" stroke-linejoin="round"/></g>' +
+    '<g><rect x="168" y="70" width="64" height="44" fill="#A8733F" stroke="#6E4A28" stroke-width="3"/><path d="M160 70l40-30 40 30z" fill="#7A5230" stroke="#6E4A28" stroke-width="3" stroke-linejoin="round"/></g>' +
+    '<g><rect x="296" y="70" width="64" height="44" fill="#D9534F" stroke="#8E2F2C" stroke-width="3"/><path d="M288 70l40-30 40 30z" fill="#6B3A3A" stroke="#8E2F2C" stroke-width="3" stroke-linejoin="round"/><rect x="340" y="38" width="10" height="20" fill="#8E2F2C"/></g>' +
+    '<g stroke="#8E2F2C" stroke-width="2" opacity=".6"><path d="M296 84h64M296 98h64M312 70v14M344 84v14M328 98v16"/></g>' +
+    '<g fill="#7A5230"><rect x="62" y="96" width="20" height="18"/><rect x="190" y="96" width="20" height="18"/><rect x="318" y="96" width="20" height="18"/></g></svg>';
+  ART.name = '<svg ' + o + '><defs>' + grad('gnm', '#5B3A1F', '#9A6A33') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#gnm)"/>' +
+    '<rect x="300" y="20" width="64" height="54" rx="6" fill="#9CD3F0" stroke="#3E2812" stroke-width="5"/><path d="M332 20v54M300 47h64" stroke="#3E2812" stroke-width="4"/>' +
+    '<rect y="112" width="400" height="28" fill="#3E2812"/>' +
+    '<g fill="none" stroke="#FFD36B" stroke-width="2.5" stroke-linecap="round"><path d="M40 0q14 40-4 70M70 0q-10 36 6 64M360 0q-16 50 6 90"/></g>' +
+    '<g stroke="#FFC93C" stroke-width="3" stroke-linecap="round"><path d="M30 112l-12-26M44 112l-4-30M58 112l10-28M72 112l16-24"/></g>' +
+    '<circle cx="190" cy="82" r="32" fill="none" stroke="#3E2812" stroke-width="6"/><circle cx="190" cy="82" r="5" fill="#3E2812"/>' +
+    '<path d="M190 50v64M158 82h64M167 59l46 46M213 59l-46 46" stroke="#3E2812" stroke-width="3"/>' +
+    '<circle cx="190" cy="82" r="24" fill="none" stroke="#FFD36B" stroke-width="2" stroke-dasharray="4 6"/>' +
+    '<path d="M222 108l50-22" stroke="#FFD36B" stroke-width="3" stroke-linecap="round"/></svg>';
+  ART.mix = '<svg ' + o + '><defs>' + grad('gmx', '#1B1040', '#4B2C7F') + '</defs>' +
+    '<rect width="400" height="140" fill="url(#gmx)"/>' +
+    '<g fill="none" stroke-width="5" stroke-linecap="round"><path d="M200 70m-14 0a14 14 0 1 1 28 0a28 28 0 1 1-56 0a42 42 0 1 1 84 0a56 56 0 1 1-112 0" stroke="#FF8FB3" opacity=".8"/>' +
+    '<path d="M0 30q60 30 120 0T240 20T400 40" stroke="#6BD5FF" opacity=".7"/><path d="M0 120q80-34 160-6t240-16" stroke="#FFD36B" opacity=".7"/></g>' +
+    '<g font-family="Georgia,serif" font-weight="700" fill="#FFFFFF" opacity=".9"><text x="46" y="52" font-size="28">A</text><text x="320" y="46" font-size="24">?</text><text x="92" y="116" font-size="22">hic</text><text x="296" y="112" font-size="30">&amp;</text><text x="352" y="90" font-size="20">b</text><text x="14" y="96" font-size="18">!</text></g>' +
+    '<rect x="170" y="44" width="60" height="52" rx="4" fill="#FFF6DD" stroke="#D9A21B" stroke-width="3"/><path d="M182 62h36M182 74h36M182 86h24" stroke="#C9B58A" stroke-width="3" stroke-linecap="round"/></svg>';
+})();
+
+/* ---------- Book Two: trophies ---------- */
+ach('k_comfort', 'Pip’s Best Friend', 'You told Pip mistakes are okay. He wrote it on his monocle.');
+ach('b_climb', 'Beanstalk Bounce', 'You bounced up a beanstalk. Pip says it was more of a flop.');
+ach('b_tea', 'Tea With a Giant', 'You sipped tea from a cup the size of a bathtub. Pinkies up.');
+ach('b_cloud', 'Head in the Clouds', 'You finished the Beanstalk Kingdom. Your head is literally in the clouds.');
+ach('l_clock', 'Tick Tock Talk', 'You got a stuck clock to tick again. Mostly by asking nicely.');
+ach('l_pumpkin', 'Gourd Almighty', 'A pumpkin took your advice. It became a pie. Everybody wins.');
+ach('l_door', 'Doorman’s Day Off', 'You got past the grumpiest doorman in any story. His hat fell off again.');
+ach('l_ball', 'Midnight Magic', 'The clock struck twelve! Everyone went home to bed. Wonderful.');
+ach('p_stage', 'Stage Builder', 'You built a stage for a wolf. Nobody got blown away.');
+ach('p_poem', 'First Poetry Night', 'A wolf read a poem. The pigs cried. The cow clapped.');
+ach('p_pigs', 'Little Pigs, Big Dreams', 'The Three Pigs have a poetry hall now. They are insufferable about it.');
+ach('n_silly', 'Reginald Who?', 'You guessed a very silly name. He gave you partial credit.');
+ach('n_name', 'Name That Name', 'You said Rumpelstiltskin without tying your tongue in knots.');
+ach('n_gold', 'Spun Into Gold', 'You got a golden bookmark. It is slightly sticky.');
+ach('all_stars2', 'Four New Stars', 'All four Book Two Story Stars! Pip wants a constellation named “Pip.”');
+ach('m_team', 'Story Friends Reunion', 'Everybody you helped came back to help you. Pip needed a tissue.');
+ach('m_pip', 'Hiccup Healer', 'You helped Pip stop hiccuping. Do not tell him how funny they were.');
+ach('m_story', 'Author, Author!', 'You wrote the first line of a brand-new story. Pip wants it framed.');
+ach('z_end', 'Book Two Bookworm', 'You finished Book Two. Pip hiccuped only once. Okay, twice.');
+/* ---------- Book Two: opening, hub, shop ---------- */
+sc('k1', { w: 'attic', ch: 'Book Two · The Mixed-Up Pages', fx: { book: 2 }, t: [
+  'The next morning, sunshine pours into the attic. The golden book is already open.',
+  'Something is off. A tiny beanstalk is growing out of the page.',
+  'Hic!',
+  '@Pip: Oh dear. Hic! Good morning, {name}. I may have, hic, done something silly.'
+], n: 'k2' });
+sc('k2', { w: 'attic', t: [
+  '@Pip: Last night I was so happy about the endings that I... ate something.',
+  '@Pip: I did not mean to! It was just sitting there. Hic! It was the Table of Contents.',
+  'You gasp. Pip covers his face with his monocle.',
+  '@Pip: Without it, the stories do not know where they start. They are drifting. Characters are wandering into the wrong tales!'
+], n: 'k3' });
+sc('k3', { w: 'attic', t: [
+  '@Pip: It gets worse. Every time I hiccup, a piece of the Table of Contents pops out and lands in a different story. Hic!',
+  'Four pieces. Four stories. And each one is a little mixed up.',
+  '@Pip: I am so sorry, {name}. I am a terrible bookworm.'
+], c: [
+  { l: '“Everybody makes mistakes, Pip.”', to: 'k4', fx: { kindness: 1, ach: 'k_comfort' } },
+  { l: '“Don’t worry. We’ll fix it together.”', to: 'k4', fx: { courage: 1 } },
+  { l: '“Let’s make a plan.”', to: 'k4', fx: { wits: 1 } }
+] });
+sc('k4', { w: 'attic', t: [
+  '@Pip: You are right. Thank you. Hic! Let us get my pieces back.',
+  'The book glows. You and Pip tumble back into the pages.',
+  'Plop! You land on the rug in the Hall of Doors. But something is different.'
+], n: 'kh' });
+
+sc('kh', { w: 'attic', ch: 'The Hall of Wandering Doors', fx: { heal: true }, t: [
+  ['!allstars2', 'The doors are wandering! One drifts past. Another bumps into a wall and says, “Sorry!”'],
+  ['!allstars2', '@Pip: Hic! The doors are as confused as I am. Pick one before it wanders off.'],
+  ['!allstars2', '@Pip: I smell beans. And pumpkins. And... is that straw?'],
+  ['allstars2', 'All four pieces float above you, glowing. The doors stop wandering and line up neatly.'],
+  ['allstars2', '@Pip: The Middle of the Book! That is where the stories are the most mixed up.'],
+  ['allstars2', '@Pip: Ready, {name}? Hic. I mean, yes. I am ready.']
+], c: [
+  { l: 'Sky door: The Beanstalk Kingdom', to: 'b1', if: '!bean_done' },
+  { l: 'Silver door: The Midnight Ball', to: 'l1', if: '!ball_done' },
+  { l: 'Brick door: The Three Pigs’ Village', to: 'p1', if: '!pigs_done' },
+  { l: 'Thread door: The Name Game', to: 'n1', if: '!name_done' },
+  { l: 'Rainbow door: The Middle of the Book', to: 'm1', if: 'allstars2' }
+] });
+
+sc('ks', { w: 'attic', ch: 'Pip’s Pocket Shop', t: [
+  '@Pip: Shop time again! Hic. Sorry. Shop time again!',
+  '@Pip: These are rare finds. Each one makes a power stronger.'
+], c: [
+  { l: 'Golden Bean: +1 Courage', cost: 7, to: 'kh', fx: { courage: 1, ach: 'shopper' } },
+  { l: 'Glass Slipper Charm: +1 Kindness', cost: 7, to: 'kh', fx: { kindness: 1, ach: 'shopper' } },
+  { l: 'Golden Thread Scarf: +1 Wits', cost: 7, to: 'kh', fx: { wits: 1, ach: 'shopper' } },
+  { l: 'No thanks, onward!', to: 'kh' }
+] });
+
+/* ---------- Book Two, Chapter 1: The Beanstalk Kingdom ---------- */
+sc('b1', { w: 'bean', ch: 'Book Two · Chapter 1 · The Beanstalk Kingdom', t: [
+  'You step through the sky door and land on a giant, bouncy leaf. Boing!',
+  'A beanstalk as thick as a tree stretches up into the clouds.',
+  '@Pip: Hic! The Contents piece must be at the top.',
+  'A sign says: CLIMBERS WELCOME. GIANTS ALSO WELCOME. PLEASE DO NOT FEED THE GOOSE.'
+], n: 'b2' });
+sc('b2', { w: 'bean', t: [
+  'You start to climb. The leaves are as big as blankets.',
+  'Halfway up, a gust of wind swings the whole stalk. Wheee!',
+  '@Pip: Hold on! Hic! I am a worm and I am scared of heights!'
+], c: [
+  { l: 'Climb slow and steady', chk: ['courage', 3, 'b3', 'b2f'] },
+  { l: 'Swing from vine to vine', chk: ['wits', 3, 'b3', 'b2f'] },
+  { l: 'Sing a calming song to Pip', chk: ['kindness', 3, 'b3', 'b2f'] }
+] });
+sc('b2f', { w: 'bean', fx: { hp: -1 }, t: [
+  'You slip! A big leaf catches you like a trampoline. Boing, boing, BOING!',
+  'You bounce right up past the clouds. Not bad!'
+], n: 'b3' });
+sc('b3', { w: 'bean', fx: { ach: 'b_climb' }, t: [
+  'You pop through the clouds into a sunny kingdom made of fluff.',
+  'There is a house the size of a hill. There are cupcakes the size of sofas.',
+  '@Pip: Do not eat the cupcakes. Hic! They are not ours. ...They look so good, though.'
+], n: 'b4' });
+sc('b4', { w: 'bean', t: [
+  'A familiar roar-squeak echoes across the clouds. “Rrrr... eep!”',
+  'It is the Lion! He wears a tiny helmet and guards the giant’s front door.',
+  '@Lion: Hello, friend! I got mixed up in this story. They made me the Brave Guard. I squeak at every visitor.',
+  'The huge door creaks open. A very tall, very gentle giant ducks out, holding a teacup.'
+], n: 'b5' });
+sc('b5', { w: 'bean', t: [
+  '@Gus: Oh! Visitors! Hello! I am Gus. Please do not run. I know I am big.',
+  '@Gus: Everyone who climbs up here runs away screaming. Even the goose.',
+  'A golden goose waddles over and honks sadly. It lays a tiny golden egg and sighs.',
+  '@Gus: I just wanted someone to share my cupcakes.',
+  '@Pip: Hic! The Contents piece! I can smell it. It is in his pantry.'
+], c: [
+  { l: 'Have tea with the giant', chk: ['kindness', 3, 'b6', 'b5f'] },
+  { l: 'Ask about his cupcake recipes', chk: ['wits', 3, 'b6', 'b5f'] },
+  { l: 'Stand tall and say hello properly', chk: ['courage', 3, 'b6', 'b5f'] }
+] });
+sc('b5f', { w: 'bean', fx: { hp: -1 }, t: [
+  'You trip on a teaspoon the size of a canoe and flop into a cupcake. Splat!',
+  'Gus laughs. The goose honks. The tea party begins anyway.'
+], n: 'b6' });
+sc('b6', { w: 'bean', fx: { ach: 'b_tea' }, t: [
+  'The tea is served in cups the size of bathtubs. Pinkies up!',
+  'Gus leads you to his pantry. It is full of giant jars, giant spoons, and one giant mouse who waves.',
+  'On the highest shelf, a scrap of the Table of Contents sticks to a jar of honey.',
+  '@Pip: Hic! That is mine! Well, it was mine. I ate it. Then I hiccuped.'
+], c: [
+  { l: 'Stack cupcakes into stairs', chk: ['wits', 3, 'b7', 'b6f'] },
+  { l: 'Ask the Lion for a boost', chk: ['courage', 3, 'b7', 'b6f'] },
+  { l: 'Ask the goose to help you, kindly', chk: ['kindness', 3, 'b7', 'b6f'] }
+] });
+sc('b6f', { w: 'bean', fx: { hp: -1 }, t: [
+  'The stack wobbles. The jar tips. A river of honey slides down.',
+  'You, the Lion, and Pip are stuck together like toast with jam.',
+  'Gus laughs so hard the pantry shakes, and the jar falls straight into your hands.'
+], n: 'b7' });
+sc('b7', { w: 'bean', t: [
+  'You grab the scrap. It glows. The word on it says: “Chapter One: The Beginning.”',
+  'Gus is crying happy tears the size of bathtubs.',
+  '@Gus: Nobody ever helped me before. Nobody ever stayed for tea.',
+  '@Pip: Hic! Next time I will not eat the Table of Contents. Probably.'
+], c: [
+  { l: 'Invite Gus to a picnic below', to: 'b8', fx: { kindness: 1, flag: 'gus_friend' } },
+  { l: 'Say goodbye and thank him', to: 'b8' }
+] });
+sc('b8', { w: 'bean', fx: { star: 'bean', flag: 'bean_done', coins: 4, ach: 'b_cloud' }, t: [
+  'The goose lays a golden egg for each of you. They are chocolate inside.',
+  ['gus_friend', 'Gus promises to come down for picnics. “I will bring cupcakes. And a bigger blanket.”'],
+  'The Lion tries one more roar. “RAAAWR!” A cloud pops. “...Eep.” He grins.',
+  'The piece of the Table of Contents floats into your pocket.',
+  'A glowing Story Star floats up from the clouds. It is yours!'
+], n: 'ks' });
+/* ---------- Book Two, Chapter 2: The Midnight Ball ---------- */
+sc('l1', { w: 'ball', ch: 'Book Two · Chapter 2 · The Midnight Ball', t: [
+  'You land in a grand ballroom, right in the middle of a waltz. Everyone is dancing. Everyone looks very tired.',
+  'A giant clock on the wall says 11:59. It has said 11:59 for a very long time.',
+  '@Pip: Hic! The ball never ends! The clock is stuck, so it can never be midnight.',
+  'A girl in a sparkly dress sits on the stairs, holding one shoe.'
+], n: 'l2' });
+sc('l2', { w: 'ball', t: [
+  '@Cinder: Oh, hello! I am Cinder. Everyone calls me that, even though I am very clean now.',
+  '@Cinder: The Fairy Godmother ran out of sparkle. Nobody can leave, and my feet hurt.',
+  'The Tin Woodman spins by, teaching everyone a very squeaky waltz.',
+  '@Tin Woodman: One, two, three, squeak! One, two, three, squeak!',
+  '@Pip: Hic! The Contents piece must be inside that clock.'
+], n: 'l3' });
+sc('l3', { w: 'ball', t: [
+  'The ball has three problems: the clock, the guests, and the Godmother.',
+  '@Cinder: Where would you like to start?'
+], c: [
+  { l: 'Fix the clock', to: 'l4a' },
+  { l: 'Cheer up the guests', to: 'l4b' },
+  { l: 'Help the Fairy Godmother', to: 'l4c' }
+] });
+
+sc('l4a', { w: 'ball', t: [
+  'You climb up inside the tall clock. The gears are tangled in ribbons and confetti.',
+  'It is warm in here. It smells like old pennies.'
+], c: [
+  { l: 'Untangle the gears carefully', chk: ['wits', 3, 'l4a2', 'l4a3'] },
+  { l: 'Pull the stuck lever hard', chk: ['courage', 3, 'l4a2', 'l4a3'] },
+  { l: 'Ask the clock nicely to tick', chk: ['kindness', 3, 'l4a2', 'l4a3'] }
+] });
+sc('l4a2', { w: 'ball', fx: { wits: 1, coins: 2, ach: 'l_clock' }, t: [
+  'Tick... tick... The clock shivers, and the minute hand moves. A little.',
+  '@Clock: Almost. I need one more push. Please.'
+], n: 'l5' });
+sc('l4a3', { w: 'ball', fx: { hp: -1, coins: 1, ach: 'l_clock' }, t: [
+  'A spring boings loose and flings a confetti shower over the whole ball. The guests cheer.',
+  'The clock tick-tocks, just a little.'
+], n: 'l5' });
+
+sc('l4b', { w: 'ball', t: [
+  'The dancers are so tired that they are dancing in their sleep. A duke is snoring while waltzing.'
+], c: [
+  { l: 'Start a conga line', chk: ['courage', 3, 'l4b2', 'l4b3'] },
+  { l: 'Pass out cups of lemonade', chk: ['kindness', 3, 'l4b2', 'l4b3'] },
+  { l: 'Teach a silly sit-down dance', chk: ['wits', 3, 'l4b2', 'l4b3'] }
+] });
+sc('l4b2', { w: 'ball', fx: { kindness: 1, coins: 2 }, t: [
+  'The guests sit and giggle. Soon, everyone is laughing instead of waltzing.',
+  'Even the duke wakes up. “Did I miss anything?” he asks.'
+], n: 'l5' });
+sc('l4b3', { w: 'ball', fx: { hp: -1, coins: 1 }, t: [
+  'The conga line goes the wrong way and loops three times around the chandelier.',
+  'Everyone has fun anyway. You are a little dizzy.'
+], n: 'l5' });
+
+sc('l4c', { w: 'ball', t: [
+  'The Fairy Godmother slumps in a corner with a wilted wand. Her glitter is all gone.',
+  '@Godmother: I used every sparkle on the pumpkin. It will not turn back. It just says “gourd.”',
+  'A very stubborn pumpkin carriage sits nearby, looking proud.'
+], c: [
+  { l: 'Gather glitter from the dresses', chk: ['wits', 3, 'l4c2', 'l4c3'] },
+  { l: 'Give her a big warm hug', chk: ['kindness', 3, 'l4c2', 'l4c3'] },
+  { l: 'Give the pumpkin a pep talk', chk: ['courage', 3, 'l4c2', 'l4c3'] }
+] });
+sc('l4c2', { w: 'ball', fx: { courage: 1, coins: 2, ach: 'l_pumpkin' }, t: [
+  'The wand flickers back to life. Sparkle!',
+  'The pumpkin sighs happily and shrinks into a very tired pumpkin pie.'
+], n: 'l5' });
+sc('l4c3', { w: 'ball', fx: { hp: -1, coins: 1, ach: 'l_pumpkin' }, t: [
+  'The wand sneezes a rainbow. Poof! The pumpkin turns into a giant goldfish.',
+  'It looks calm, so nobody argues.'
+], n: 'l5' });
+
+sc('l5', { w: 'ball', t: [
+  'Time to reach the top of the clock tower. But a mixed-up guest blocks the door: the Sheriff of Nottingham, in a doorman’s hat.',
+  ['wood_kind', '@Sheriff: Oh, hello, friend! I got mixed in as the doorman. I love it. People invite me to things now!'],
+  ['!wood_kind', '@Sheriff: Halt! Nobody enters the clock tower. I am the doorman now. I do not know why.'],
+  'He crosses his arms. His tall hat is very, very crooked.'
+], c: [
+  { l: 'Ask him politely to step aside', chk: ['kindness', 3, 'l5a', 'l5f'] },
+  { l: 'Make him laugh with a joke', chk: ['wits', 3, 'l5a', 'l5f'] },
+  { l: 'Stare him down', chk: ['courage', 3, 'l5a', 'l5f'] }
+] });
+sc('l5a', { w: 'ball', fx: { coins: 2, ach: 'l_door' }, t: [
+  'The Sheriff blinks. “Oh. Well. When you put it like that.”',
+  'He steps aside and tips his hat. It falls off.'
+], n: 'l6' });
+sc('l5f', { w: 'ball', fx: { hp: -1, ach: 'l_door' }, t: [
+  'The Sheriff holds firm, then sneezes. His hat flies off and lands on a chandelier.',
+  'In the chaos, you slip past.'
+], n: 'l6' });
+
+sc('l6', { w: 'ball', t: [
+  'At the top, a glowing Contents scrap is stuck to the clock’s face like a sticker.',
+  'The minute hand is almost at twelve. One last push, and midnight can strike.'
+], c: [
+  { l: 'Push the hand with all your might', chk: ['courage', 4, 'l7', 'l6f'] },
+  { l: 'Time it with a clever swing', chk: ['wits', 4, 'l7', 'l6f'] },
+  { l: 'Whisper, “It is okay to let the night begin.”', chk: ['kindness', 4, 'l7', 'l6f'] }
+] });
+sc('l6f', { w: 'ball', fx: { hp: -1 }, t: [
+  'The hand wiggles, boings, and flings you onto the pendulum. You swing back and forth like a bell.',
+  'Ding, dong! It works anyway.'
+], n: 'l7' });
+sc('l7', { w: 'ball', t: [
+  'DONG! The clock strikes twelve. Every guest cheers. They yawn, stretch, and go home to bed.',
+  'The Contents scrap pops out, glowing.',
+  '@Cinder: Thank you! I can finally take off these shoes!',
+  '@Pip: Hic! And thank you for the lovely ball, Cinder. Sorry about the hiccups.'
+], n: 'l8' });
+sc('l8', { w: 'ball', fx: { star: 'ball', flag: 'ball_done', coins: 4, ach: 'l_ball' }, t: [
+  'Cinder leads you to the balcony. The whole sky is full of sparkles. It is the Godmother’s last bit of magic.',
+  'She gives you one of her glass shoes as a keepsake. It only squeaks a little.',
+  'The page writes itself: “And Cinder danced until midnight, then slept happily ever after.”',
+  'A glowing Story Star floats up. It is yours!'
+], n: 'ks' });
+/* ---------- Book Two, Chapter 3: The Three Pigs’ Village ---------- */
+sc('p1', { w: 'pigs', ch: 'Book Two · Chapter 3 · The Three Pigs’ Village', t: [
+  'You land on a cobbled road in a tiny village. There are three houses: one of straw, one of sticks, and one of bricks.',
+  'Three pigs in tool belts rush up, all talking at once.',
+  '@Pip: Hic! Everybody is a little mixed up here.',
+  'A tall man in a green hat is hammering on a rooftop. It is Robin Hood.',
+  '@Robin: Well met! I am the roofer now!'
+], n: 'p2' });
+sc('p2', { w: 'pigs', t: [
+  '@Hammy: Hello! I am Hammy. This is Splinter and Mortar.',
+  '@Splinter: We are the Three Pigs. We build houses.',
+  '@Mortar: The problem is the wolf.',
+  '@Hammy: He huffs. He puffs. He blows our houses down every Tuesday.',
+  '@Pip: Hic! What day is it today? ...Oh no.'
+], n: 'p3' });
+sc('p3', { w: 'pigs', t: [
+  'A long, sad howl drifts across the hills. It sounds like music. Sort of.',
+  'It is Wolfgang, wearing his scarf and holding his notebook.',
+  '@Wolfgang: Hello, friends! Sorry about this. Pip’s hiccups swapped my story with the Big Bad Wolf’s.',
+  '@Wolfgang: Now every time I read a poem, I get so nervous that I huff and puff and blow houses down!',
+  'The pigs shriek and dive behind a barrel.',
+  '@Pip: Hic! My fault again. Everything that goes wrong is my fault.'
+], c: [
+  { l: 'Tell Pip it is not his fault', to: 'p4', fx: { kindness: 1 } },
+  { l: 'Calm the pigs first', to: 'p4', fx: { courage: 1 } },
+  { l: 'Look for the Contents piece', to: 'p4', fx: { wits: 1 } }
+] });
+sc('p4', { w: 'pigs', t: [
+  'The Contents scrap is stuck in the chimney of the brick house, where Wolfgang’s huffing blew it.',
+  'But the houses keep falling down whenever Wolfgang recites.',
+  '@Pip: What if we build something strong enough for poetry?',
+  '@Robin: A poetry hall! With a stage and a roof!',
+  'The village looks at you. It needs a plan.'
+], c: [
+  { l: 'Help the pigs build the stage', to: 'p5a' },
+  { l: 'Help Wolfgang calm his nerves', to: 'p5b' },
+  { l: 'Help Robin protect the roof', to: 'p5c' }
+] });
+
+sc('p5a', { w: 'pigs', t: [
+  'You and the pigs lay out beams and boards. Splinter measures twice. Hammy measures once. Mortar eats the tape measure.'
+], c: [
+  { l: 'Lift the heavy beam', chk: ['courage', 3, 'p5a2', 'p5a3'] },
+  { l: 'Draw a clever blueprint', chk: ['wits', 3, 'p5a2', 'p5a3'] },
+  { l: 'Cheer everyone on', chk: ['kindness', 3, 'p5a2', 'p5a3'] }
+] });
+sc('p5a2', { w: 'pigs', fx: { courage: 1, coins: 2, ach: 'p_stage' }, t: [
+  'The stage goes up in a flash. It has a roof, a curtain, and a tiny snack bar.',
+  '@Hammy: Nobody does it better than a pig with a plan!'
+], n: 'p6' });
+sc('p5a3', { w: 'pigs', fx: { hp: -1, coins: 1, ach: 'p_stage' }, t: [
+  'The beam slides and bonks Hammy’s helmet. Clang!',
+  'But the beam lands exactly where it belongs. The stage stands tall.'
+], n: 'p6' });
+
+sc('p5b', { w: 'pigs', t: [
+  'Wolfgang sits on a log, shaking. His notebook rattles.',
+  '@Wolfgang: What if everyone laughs? What if they scream? What if I blow them all away?'
+], c: [
+  { l: 'Breathe slowly with him', chk: ['kindness', 3, 'p5b2', 'p5b3'] },
+  { l: 'Play a pretend-audience game', chk: ['wits', 3, 'p5b2', 'p5b3'] },
+  { l: 'Stand beside him, hand on his paw', chk: ['courage', 3, 'p5b2', 'p5b3'] }
+] });
+sc('p5b2', { w: 'pigs', fx: { kindness: 1, coins: 2 }, t: [
+  'In. Out. In. Out. Wolfgang’s breathing slows. A small puff comes out. It only moves a feather.',
+  '@Wolfgang: I think I can do this!'
+], n: 'p6' });
+sc('p5b3', { w: 'pigs', fx: { hp: -1, coins: 1 }, t: [
+  'He breathes too fast and blows your hat off. It lands on a cow. The cow looks pleased.',
+  'You try again, slower. It works a little better.'
+], n: 'p6' });
+
+sc('p5c', { w: 'pigs', t: [
+  '@Robin: Roof duty! I shall protect these tiles with my life. And my hat.',
+  'A strong gust from the hills threatens to blow the stage away.'
+], c: [
+  { l: 'Tie the tiles down with rope', chk: ['wits', 3, 'p5c2', 'p5c3'] },
+  { l: 'Hold the roof against the wind', chk: ['courage', 3, 'p5c2', 'p5c3'] },
+  { l: 'Ask the wind to be gentle', chk: ['kindness', 3, 'p5c2', 'p5c3'] }
+] });
+sc('p5c2', { w: 'pigs', fx: { wits: 1, coins: 2 }, t: [
+  'The roof stays put. Robin does a perfect somersault.',
+  '@Robin: That was no ordinary roof!'
+], n: 'p6' });
+sc('p5c3', { w: 'pigs', fx: { hp: -1, coins: 1 }, t: [
+  'The tiles rattle. A few slide off and land in the pigs’ soup. Nobody minds. It was bland anyway.'
+], n: 'p6' });
+
+sc('p6', { w: 'pigs', t: [
+  'By evening, the poetry stage is ready. The pigs bring tiny chairs. Robin hangs lanterns. Wolfgang trembles.',
+  '@Hammy: Remember, if you huff, we hold on to the barrel!',
+  '@Wolfgang: I am ready. I think. Maybe.'
+], c: [
+  { l: 'Give him a big, warm cheer', chk: ['kindness', 3, 'p7', 'p6f'] },
+  { l: 'Hold up a sign: “GO WOLF!”', chk: ['wits', 3, 'p7', 'p6f'] },
+  { l: 'Take the front row, smiling', chk: ['courage', 3, 'p7', 'p6f'] }
+] });
+sc('p6f', { w: 'pigs', fx: { hp: -1 }, t: [
+  'Wolfgang takes a deep breath. HUUUUFF! The audience grips their chairs. The lanterns wobble.',
+  'But everything stays up. He blushes. “Too much?”',
+  '“A little!” you say, and everyone laughs.'
+], n: 'p7' });
+sc('p7', { w: 'pigs', fx: { ach: 'p_poem' }, t: [
+  'Wolfgang clears his throat. He reads a poem about a village that builds things together. It is gentle and a little funny.',
+  'The pigs sniffle. Robin cheers. The cow moos. The audience claps.',
+  '@Wolfgang: The houses stayed up! Nobody blew away!',
+  '@Mortar: Did he say something about brick? I love brick!'
+], n: 'p8' });
+sc('p8', { w: 'pigs', fx: { star: 'pigs', flag: 'pigs_done', coins: 4, ach: 'p_pigs' }, t: [
+  'In the brick house’s chimney, a tiny scrap begins to glow.',
+  'Wolfgang’s last, gentle breath, a soft “whoosh,” lifts the piece out and into your palm.',
+  '@Pip: Hic! The Contents! And nobody got blown away.',
+  'The page writes itself: “And the Three Pigs, the Wolf, and the Roofer built poetry together, forever.”',
+  'A glowing Story Star floats up. It is yours!'
+], n: 'ks' });
+/* ---------- Book Two, Chapter 4: The Name Game ---------- */
+sc('n1', { w: 'name', ch: 'Book Two · Chapter 4 · The Name Game', t: [
+  'You step into a tiny workshop. Straw is everywhere. Golden thread hangs from the ceiling like spaghetti.',
+  'A little man in a pointed hat paces in circles, muttering.',
+  '@Pip: Hic! He is... very small.',
+  'The Scarecrow is lying in a corner, being used as a pillow.',
+  '@Scarecrow: Hello! I got mixed in. I am the straw supplier now. It is going okay.'
+], n: 'n2' });
+sc('n2', { w: 'name', t: [
+  '@Spinner: I am the greatest spinner in all the land! I spin straw into gold! And I am... I am... oh no, oh no, oh no.',
+  'He stops. His face goes pale.',
+  '@Spinner: I cannot remember my name.',
+  '@Scarecrow: I tried to help. I said it was Steve. He did not like Steve.',
+  '@Pip: Hic! This is my fault. I hiccuped, and his name popped right out of his story.'
+], n: 'n3' });
+sc('n3', { w: 'name', t: [
+  'The little man sits down on a spool and puts his head in his hands.',
+  '@Spinner: Without my name, I cannot finish my contract. And without a contract, I have no friends.',
+  '@Spinner: I just want someone to guess it. I just want somebody to want to guess.',
+  'The Contents piece is hidden in his spinning wheel, going round and round.'
+], c: [
+  { l: 'Promise to help him find it', to: 'n4', fx: { kindness: 1 } },
+  { l: 'Ask about his favorite things', to: 'n4', fx: { wits: 1 } },
+  { l: 'Offer to guess all day if you must', to: 'n4', fx: { courage: 1 } }
+] });
+sc('n4', { w: 'name', t: [
+  'The Scarecrow reads from a dusty book. “The name has clues! Three of them!”',
+  'They are written on three golden spools.',
+  '@Scarecrow: One is in the attic. One is in the garden. One is in the kitchen.',
+  '@Pip: Hic! Let us start in the attic.'
+], n: 'n5' });
+
+sc('n5', { w: 'name', t: [
+  'The attic is dark and full of spinning wheels. One spool glows at the far end.',
+  'The wheels turn slowly. Squeak, squeak, squeak.'
+], c: [
+  { l: 'Hop across the wheels', chk: ['courage', 3, 'n6', 'n6f'] },
+  { l: 'Follow the golden thread', chk: ['wits', 3, 'n6', 'n6f'] },
+  { l: 'Ask the wheels to guide you', chk: ['kindness', 3, 'n6', 'n6f'] }
+] });
+sc('n6', { w: 'name', fx: { coins: 2 }, t: [
+  'You find the glowing spool. It says: “Clue one. My name starts with an R.”'
+], n: 'n7' });
+sc('n6f', { w: 'name', fx: { hp: -1 }, t: [
+  'You tangle in the thread and dangle like a spider. The Scarecrow gently pulls you down.',
+  'The spool falls into your hand. “Clue one. My name starts with an R.”'
+], n: 'n7' });
+
+sc('n7', { w: 'name', t: [
+  'The garden is full of straw flowers. Each one hums a different tune.',
+  'A tiny gate guards the last row. A sign says: PLEASE BE POLITE TO THE FLOWERS.'
+], c: [
+  { l: 'Pick the flower that hums loudest', chk: ['wits', 3, 'n8', 'n8f'] },
+  { l: 'Hold the gate open for a bee', chk: ['kindness', 3, 'n8', 'n8f'] },
+  { l: 'Leap over the gate', chk: ['courage', 3, 'n8', 'n8f'] }
+] });
+sc('n8', { w: 'name', fx: { coins: 2 }, t: [
+  'Under the flower, a golden spool. “Clue two. My name has at least eleven letters.”'
+], n: 'n9' });
+sc('n8f', { w: 'name', fx: { hp: -1 }, t: [
+  'The gate snaps shut on your sleeve. Snap! You wriggle free, tumble in, and find the spool.',
+  '“Clue two. My name has at least eleven letters.”'
+], n: 'n9' });
+
+sc('n9', { w: 'name', t: [
+  'The kitchen smells like warm bread. A tiny stove is cooking spaghetti made of gold.',
+  'The last spool is hidden somewhere among the pots.'
+], c: [
+  { l: 'Taste the soup the clue is in', chk: ['kindness', 3, 'n10', 'n10f'] },
+  { l: 'Read the recipe backward', chk: ['wits', 3, 'n10', 'n10f'] },
+  { l: 'Pull the spool out of the oven', chk: ['courage', 3, 'n10', 'n10f'] }
+] });
+sc('n10', { w: 'name', fx: { coins: 2 }, t: [
+  'Clue three: “My name ends in skin.”',
+  '@Scarecrow: Skin? Steve-skin? Stilt-skin?'
+], n: 'n11' });
+sc('n10f', { w: 'name', fx: { hp: -1 }, t: [
+  'Oven mitts do not help. You grab the spool, it is hot, and you do a little dance. Ouch!',
+  'But you get it. Clue three: “My name ends in skin.”'
+], n: 'n11' });
+
+sc('n11', { w: 'name', t: [
+  'You return to the workshop with all three clues. R at the start. Eleven letters or more. Skin at the end.',
+  '@Spinner: Well?! Guess! Please, please guess!',
+  'You think. The Scarecrow whispers. Pip hiccups.'
+], c: [
+  { l: 'Rumpelstiltskin?', to: 'n12' },
+  { l: 'Reginald Skinwhiskers?', to: 'n11b', fx: { ach: 'n_silly' } },
+  { l: 'Ricky Skinnyskin?', to: 'n11b', fx: { ach: 'n_silly' } }
+] });
+sc('n11b', { w: 'name', t: [
+  'He shakes his head, but he laughs. “Close! Very close! And absolutely wrong!”',
+  '@Scarecrow: Try again. We have snacks.'
+], n: 'n11' });
+sc('n12', { w: 'name', fx: { ach: 'n_name' }, t: [
+  'You take a deep breath. “Rumpelstiltskin!”',
+  'The little man gasps. He jumps up and down. Golden sparkles fly out of his hat.',
+  '@Rumpelstiltskin: YES! That is it! That is my name! I will never forget it again! Well. I might. But now you can remind me.'
+], n: 'n13' });
+sc('n13', { w: 'name', fx: { ach: 'n_gold' }, t: [
+  'He hugs you, much harder than a small man should. Then he hugs the Scarecrow. Then Pip, who drops his monocle.',
+  '@Rumpelstiltskin: I will spin you something special as thanks.',
+  'He spins a lot of straw. Out comes a golden bookmark that says: “Every name matters.”',
+  '@Pip: I like that. Hic.'
+], n: 'n14' });
+sc('n14', { w: 'name', fx: { star: 'name', flag: 'name_done', coins: 4 }, t: [
+  'The Contents piece pops out of the spinning wheel and lands neatly in your pocket.',
+  'The page writes itself: “And Rumpelstiltskin never had to wonder about his name again.”',
+  'A glowing Story Star floats up. It is yours!'
+], n: 'ks' });
+/* ---------- Book Two, Chapter 5: The Middle of the Book ---------- */
+sc('m1', { w: 'mix', ch: 'Book Two · Chapter 5 · The Middle of the Book', t: [
+  'The rainbow door swings open. Beyond it, the whole Great Storybook is a swirling, mixed-up storm of words.',
+  'Characters tumble past: a goose riding a pumpkin, a wolf wearing a crown, a giant in a tutu.',
+  '@Pip: Hic! This is it. The middle of the book. This is where I hiccuped the loudest.',
+  'In the center floats a big, empty page with a worm-shaped hole in it.'
+], n: 'm2' });
+sc('m2', { w: 'mix', t: [
+  'Your four Contents pieces rise from your pocket. They glow and spin around the empty page.',
+  '@Pip: They need to go back. But I have to do it myself. I ate them.',
+  'Pip’s voice shakes. A giant hiccup shakes the whole storm.',
+  '@Pip: What if I mess it up again, {name}? What if I always mess things up?'
+], c: [
+  { l: '“Mistakes make the best stories.”', to: 'm3', fx: { kindness: 1 } },
+  { l: '“I will be right beside you.”', to: 'm3', fx: { courage: 1 } },
+  { l: '“Let’s try a clever new way.”', to: 'm3', fx: { wits: 1 } }
+] });
+sc('m3', { w: 'mix', t: [
+  'The storm roars. Pages whip by. A gust blows your hat off.',
+  '@Pip: Hic! The only way through is the Bridge of Pages.',
+  'A narrow bridge of floating pages stretches over the swirling words.'
+], c: [
+  { l: 'Hop across bravely', chk: ['courage', 4, 'm4', 'm3f'] },
+  { l: 'Plan each step like a puzzle', chk: ['wits', 4, 'm4', 'm3f'] },
+  { l: 'Hold hands with Pip and go together', chk: ['kindness', 4, 'm4', 'm3f'] }
+] });
+sc('m3f', { w: 'mix', fx: { hp: -1 }, t: [
+  'A page flips under your feet. Whoosh! You whirl in a circle and land back on the bridge, a little dizzy.'
+], n: 'm4' });
+sc('m4', { w: 'mix', fx: { ach: 'm_team' }, t: [
+  'Your story friends arrive, one by one, riding on floating pages.',
+  'Giant Gus carries you across a gap, holding a cupcake as an umbrella. The Lion rides his shoulder, squeaking encouragement.',
+  ['gus_friend', '@Gus: I brought extra cupcakes. For emergencies. And friends.'],
+  'Cinder waves her glass shoe. Rumpelstiltskin spins a golden rope bridge in seconds.',
+  'The three pigs and Wolfgang show up with a toolbox and a poem.',
+  '@Pip: Hic! You all came.',
+  '@Cinder: Of course. We would not miss it.'
+], n: 'm5' });
+sc('m5', { w: 'mix', t: [
+  'At the center, the storm swirls hardest. A huge whirlpool of words circles the empty page.',
+  'Every time Pip steps closer, he hiccups, and the words scatter.',
+  '@Rumpelstiltskin: His hiccups are the key. They scare the words!',
+  '@Wolfgang: Maybe he needs a breathing trick.'
+], c: [
+  { l: 'Teach Pip the slow-breathing trick', chk: ['kindness', 4, 'm6', 'm5f'] },
+  { l: 'Distract the words with a loud cheer', chk: ['courage', 4, 'm6', 'm5f'] },
+  { l: 'Ask Pip to try humming', chk: ['wits', 4, 'm6', 'm5f'] }
+] });
+sc('m5f', { w: 'mix', fx: { hp: -1 }, t: [
+  'Hic! A flock of words scatters into your face. You come out covered in commas and one exclamation point.',
+  'You try again, slower.'
+], n: 'm6' });
+sc('m6', { w: 'mix', fx: { ach: 'm_pip' }, t: [
+  'Pip takes a slow, deep breath. In. Out. In. Out.',
+  'The hiccups slow. The storm calms, just a little.',
+  '@Pip: It is working! Hic... no. No hic. I think I am done hiccuping.',
+  'He steps up to the empty page and sets down the first piece of the Table of Contents.'
+], n: 'm7' });
+sc('m7', { w: 'mix', t: [
+  'Four pieces. Four places. Which one goes in first?',
+  '@Pip: What do you think, {name}?'
+], c: [
+  { l: 'The beanstalk piece, up high', to: 'm8', fx: { flag: 'order1' } },
+  { l: 'The ball piece, at midnight', to: 'm8', fx: { flag: 'order2' } },
+  { l: 'The pig piece, with a home', to: 'm8', fx: { flag: 'order3' } }
+] });
+sc('m8', { w: 'mix', t: [
+  ['order1', 'The beanstalk piece goes in first. It slots in with a soft pop. Fluffy clouds spread across the page.'],
+  ['order2', 'The ball piece goes in first. It slots in with a ding. A tiny clock chimes midnight on the page.'],
+  ['order3', 'The pig piece goes in first. It slots in with a thump. A tiny brick house appears, with a wolf standing proudly beside it.'],
+  'One by one, the other pieces drift into place. Pop. Ding. Thump. Hum.',
+  'The page glows. The words rearrange themselves into tidy lines.',
+  '@Pip: The Table of Contents! It is whole again!'
+], n: 'm9' });
+sc('m9', { w: 'mix', t: [
+  'The storm settles into a calm, shimmering breeze. Everyone cheers.',
+  'But there is one more line at the bottom of the page. It is blank.',
+  '@Rumpelstiltskin: It says, “The Last Chapter: Your Story.”',
+  'Everyone looks at you. What kind of story will it be?'
+], c: [
+  { l: 'Friends who fix mistakes together', to: 'm10', fx: { flag: 'story_friends', kindness: 1 } },
+  { l: 'A brave hero stepping into a book', to: 'm10', fx: { flag: 'story_brave', courage: 1 } },
+  { l: 'A tale full of riddles and surprises', to: 'm10', fx: { flag: 'story_clever', wits: 1 } }
+] });
+sc('m10', { w: 'mix', fx: { ach: 'm_story' }, t: [
+  'You pick up the pen. Pip holds the ink. The page waits.',
+  ['story_friends', 'You write: “Once upon a time, a worm and a reader made a big mess, and then they made it right.”'],
+  ['story_brave', 'You write: “Once upon a time, a hero stepped into a book and refused to be scared.”'],
+  ['story_clever', 'You write: “Once upon a time, a riddle turned out to be the best friend anyone ever had.”'],
+  'The ink glows gold. The Table of Contents sparkles as the new chapter appears.',
+  '@Pip: That is the best line I have ever eaten. I mean read. READ.'
+], n: 'm11' });
+sc('m11', { w: 'mix', t: [
+  'The storm fades. Every character slips back to their own story, waving.',
+  'Gus leaves with a cupcake. Cinder yawns. The Three Pigs do a dance. Wolfgang reads one last poem.',
+  'The Lion roars: “RAAAWR!” Then, quietly: “...eep.” He grins.',
+  'Pip sits down beside you. He is not hiccuping at all.',
+  '@Pip: Thank you, {name}. For not giving up on me.'
+], n: 'z1' });
+
+sc('z1', { w: 'attic', ch: 'The End of Book Two', t: [
+  'You float back through the pages and land in the attic. The golden book gives a sleepy, satisfied hum.',
+  'On the cover, a new line has appeared in shiny gold letters. It says: BOOK THREE.',
+  '@Pip: It is blank. For now. Hic! ...Sorry. Just a little one.',
+  'You both laugh.'
+], n: 'z2' });
+sc('z2', { w: 'attic', fx: { ach: 'z_end', flag: 'game2_done' }, end: true, t: [
+  'Pip yawns and curls up on your shoulder.',
+  '@Pip: Goodnight, {name}. And thank you for being the best story friend a bookworm could have.',
+  'THE END OF BOOK TWO'
+] });
+/* ---------- game engine ---------- */
+(function () {
+  'use strict';
+  var KEY = 'pip-missing-endings-v1', SKEY = 'pip-missing-endings-settings-v1';
+  var MAXHP = 5, MAXSTAT = 5;
+  var STATS = ['courage', 'kindness', 'wits'];
+  var SN = { courage: 'Courage', kindness: 'Kindness', wits: 'Wits' };
+  var SIZES = [22, 26, 30, 34], SIZE_NAMES = ['Small', 'Medium', 'Large', 'Extra large'];
+  var G = null, cfg = { size: 1, theme: 'auto', read: false };
+  var beat = 0, pending = [], chipsNow = [], toastQ = [], toastBusy = false;
+  var tab = 'hero', armedReset = false, curArt = null, screen = 'title';
+
+  var BOOKS = { 1: ['wood', 'road', 'castle', 'dark'], 2: ['bean', 'ball', 'pigs', 'name'] };
+  function starCount(bk) { var n = 0; BOOKS[bk].forEach(function (k) { if (G.stars[k]) n++; }); return n; }
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function ic(n) { return '<svg class="ic" aria-hidden="true"><use href="#i-' + n + '"/></svg>'; }
+  function plural(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
+  function mk(cls, html, fn) { var b = document.createElement('button'); b.type = 'button'; b.className = cls; b.innerHTML = html; if (fn) b.addEventListener('click', fn); return b; }
+
+  function lsGet(k) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+  function save() { if (G) lsSet(KEY, G); }
+
+  function applyCfg() {
+    var r = document.documentElement;
+    r.style.setProperty('--fs', SIZES[cfg.size] + 'px');
+    if (cfg.theme === 'auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', cfg.theme);
+  }
+
+  /* ----- state helpers ----- */
+  function fresh(name) {
+    return { name: name || 'Friend', hp: MAXHP, coins: 0, courage: 1, kindness: 1, wits: 1, stars: {}, flags: {}, ach: {}, pass: 0, scene: 'a1', beat: 0, chap: '', book: 1 };
+  }
+  function sub(s) { return s.replace(/\{name\}/g, G.name); }
+  function cond(c) { if (!c) return true; if (c.charAt(0) === '!') return !G.flags[c.slice(1)]; return !!G.flags[c]; }
+  function beatsOf(s) {
+    var out = [];
+    (s.t || []).forEach(function (e) { if (typeof e === 'string') out.push(e); else if (cond(e[0])) out.push(e[1]); });
+    return out;
+  }
+  function split(line) {
+    var m = /^@([^:]{1,24}):\s*([\s\S]*)$/.exec(line);
+    return m ? { who: m[1], text: m[2] } : { who: null, text: line };
+  }
+
+  function applyFx(fx, out) {
+    if (!fx) return;
+    if (fx.book) G.book = fx.book;
+    if (fx.heal && G.hp < MAXHP) { out.push({ t: '+' + plural(MAXHP - G.hp, 'Heart'), k: 'good' }); G.hp = MAXHP; }
+    if (fx.hp) {
+      var b = G.hp; G.hp = Math.max(0, Math.min(MAXHP, G.hp + fx.hp));
+      var d = G.hp - b;
+      if (d > 0) out.push({ t: '+' + plural(d, 'Heart'), k: 'good' });
+      else if (d < 0) out.push({ t: '−' + plural(-d, 'Heart'), k: 'bad' });
+    }
+    if (fx.coins) {
+      G.coins = Math.max(0, G.coins + fx.coins);
+      out.push({ t: (fx.coins > 0 ? '+' : '−') + plural(Math.abs(fx.coins), 'Coin'), k: fx.coins > 0 ? 'good' : '' });
+      if (G.coins >= 15) unlock('pocket');
+    }
+    STATS.forEach(function (s) {
+      if (fx[s]) { var b2 = G[s]; G[s] = Math.min(MAXSTAT, G[s] + fx[s]); if (G[s] > b2) out.push({ t: '+1 ' + SN[s], k: 'good' }); }
+    });
+    if (fx.flag) [].concat(fx.flag).forEach(function (x) { G.flags[x] = 1; });
+    if (fx.star && !G.stars[fx.star]) {
+      G.stars[fx.star] = 1;
+      out.push({ t: 'Story Star!', k: 'good', star: 1 });
+      if (starCount(1) >= 4 && !G.flags.allstars) { G.flags.allstars = 1; unlock('all_stars'); }
+      if (starCount(2) >= 4 && !G.flags.allstars2) { G.flags.allstars2 = 1; unlock('all_stars2'); }
+    }
+    if (fx.ach) [].concat(fx.ach).forEach(unlock);
+  }
+  function nap(out) {
+    if (G.hp <= 0) { G.hp = 3; out.push({ t: 'Nap time! Hearts back to 3', k: 'good' }); unlock('nap_time'); }
+  }
+
+  /* ----- trophies and toasts ----- */
+  function unlock(id) {
+    if (!ACH[id] || G.ach[id]) return;
+    G.ach[id] = 1; toastQ.push(id); pump();
+  }
+  function pump() {
+    if (toastBusy || !toastQ.length) return;
+    toastBusy = true;
+    var a = ACH[toastQ.shift()];
+    var ms = Math.min(9500, 5200 + a.d.length * 45);
+    var el = document.createElement('div');
+    el.className = 'toast'; el.setAttribute('role', 'status'); el.title = 'Tap to close';
+    el.innerHTML = '<span class="ti">' + ic('cup') + '</span><div><span class="tag">Trophy unlocked</span><br><b>' + esc(a.t) + '</b></div><i>' + esc(a.d) + '</i><span class="bar" style="animation-duration:' + ms + 'ms"></span>';
+    $('toasts').appendChild(el);
+    var done = false, timer = null;
+    function close() {
+      if (done) return; done = true; clearTimeout(timer);
+      el.classList.add('out');
+      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); toastBusy = false; pump(); }, 380);
+    }
+    timer = setTimeout(close, ms);
+    el.addEventListener('click', close);
+  }
+
+  function refreshTs() {
+    $('tsLabel').textContent = SIZE_NAMES[cfg.size];
+    $('tsMinus').disabled = cfg.size === 0;
+    $('tsPlus').disabled = cfg.size === SIZES.length - 1;
+  }
+
+  /* ----- screens ----- */
+  function show(which) {
+    screen = which;
+    ['title', 'namescr', 'game'].forEach(function (id) { $(id).hidden = (id !== which); });
+    $('hud').hidden = (which !== 'game');
+    try { window.scrollTo(0, 0); } catch (e) {}
+  }
+  function toTitle() {
+    document.documentElement.setAttribute('data-world', 'attic');
+    $('titleArt').innerHTML = ART.attic;
+    var saved = lsGet(KEY);
+    $('btnContinue').hidden = !(saved && saved.scene && SC[saved.scene]);
+    refreshTs();
+    show('title');
+  }
+
+  /* ----- scenes ----- */
+  function enter(id, restore) {
+    var s = SC[id];
+    if (!s) { id = 'h'; s = SC[id]; }
+    G.scene = id;
+    if (!restore) {
+      var out = pending; pending = [];
+      applyFx(s.fx, out); nap(out);
+      chipsNow = out; beat = 0; G.beat = 0;
+      if (s.ch) G.chap = s.ch;
+      save();
+      try { window.scrollTo(0, 0); } catch (e) {}
+    } else {
+      chipsNow = [];
+      beat = Math.max(0, Math.min(G.beat || 0, beatsOf(s).length - 1));
+    }
+    show('game'); render(); speak();
+  }
+
+  function render() {
+    var s = SC[G.scene], bs = beatsOf(s), last = beat >= bs.length - 1;
+    var w = s.w || 'attic';
+    document.documentElement.setAttribute('data-world', w);
+    if (curArt !== w) { $('banner').innerHTML = ART[w] || ART.attic; curArt = w; }
+    $('chap').textContent = G.chap || '';
+
+    /* HUD */
+    var h = '';
+    for (var i = 0; i < MAXHP; i++) h += '<svg class="ic" aria-hidden="true"><use href="#' + (i < G.hp ? 'i-heart' : 'i-heart0') + '"/></svg>';
+    $('hearts').innerHTML = h; $('hearts').setAttribute('aria-label', G.hp + ' of ' + MAXHP + ' hearts');
+    $('coins').textContent = G.coins;
+    $('stars').textContent = starCount(G.book || 1) + '/4';
+
+    /* the beat */
+    var line = split(sub(bs[beat] || ''));
+    var spk = $('spk');
+    if (line.who) {
+      var av = line.who === 'Pip' ? '<svg viewBox="0 0 64 64" aria-hidden="true"><use href="#pip"/></svg>' : esc(line.who.charAt(0));
+      spk.innerHTML = '<span class="av">' + av + '</span><span>' + esc(line.who) + '</span>';
+      spk.hidden = false;
+    } else { spk.hidden = true; spk.innerHTML = ''; }
+    var tx = $('txt');
+    tx.textContent = line.text;
+    tx.classList.remove('fadein'); void tx.offsetWidth; tx.classList.add('fadein');
+
+    var cs = '';
+    if (beat === 0) chipsNow.forEach(function (c) { cs += '<span class="chip ' + (c.k || '') + '">' + (c.star ? ic('star') : '') + esc(c.t) + '</span>'; });
+    $('chips').innerHTML = cs;
+
+    var dots = '';
+    if (bs.length > 1) for (var d = 0; d < bs.length; d++) dots += '<span class="dot' + (d <= beat ? ' on' : '') + '"></span>';
+    $('dots').innerHTML = dots;
+
+    /* actions */
+    var A = $('actions'); A.innerHTML = '';
+    var flow = last && !!(s.c || s.end);
+    A.className = 'actions' + (flow ? ' flow' : '');
+    $('game').classList.toggle('choosing', flow);
+    var back = beat > 0 ? mk('btn small', ic('back') + ' Back', prev) : null;
+    if (!last) {
+      var row = document.createElement('div'); row.className = 'navrow';
+      if (back) row.appendChild(back);
+      row.appendChild(mk('btn primary', 'Next ' + ic('next'), next));
+      A.appendChild(row);
+    } else if (s.end) {
+      var n = Object.keys(G.ach).length, total = Object.keys(ACH).length;
+      var box = document.createElement('div'); box.className = 'endbox';
+      box.textContent = 'You earned ' + n + ' of ' + total + ' trophies.';
+      A.appendChild(box);
+      A.appendChild(mk('btn primary', 'See my trophies ' + ic('cup'), function () { openSheet('trophies'); }));
+      A.appendChild(mk('btn', 'Back to the title ' + ic('next'), function () { toTitle(); }));
+      if (back) A.appendChild(back);
+    } else if (s.c) {
+      var vis = s.c.filter(function (c) { return cond(c.if); });
+      vis.forEach(function (c) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'btn choice';
+        var pill = '';
+        if (c.chk) {
+          var have = G[c.chk[0]], need = c.chk[1];
+          pill = '<span class="pill ' + (have >= need ? 'ready' : 'low') + '">' + SN[c.chk[0]] + ' ' + need + ' · you have ' + have + (have >= need ? ' ✓' : ' · a bit low') + '</span>';
+        }
+        if (c.cost) {
+          var can = G.coins >= c.cost;
+          pill = '<span class="pill ' + (can ? 'ready' : 'low') + '">' + plural(c.cost, 'coin') + (can ? '' : ' · you have ' + G.coins) + '</span>';
+          if (!can) b.disabled = true;
+        }
+        b.innerHTML = '<span class="lab">' + esc(sub(c.l)) + '</span>' + pill;
+        b.addEventListener('click', function () { choose(c); });
+        A.appendChild(b);
+      });
+      if (back) A.appendChild(back);
+    } else {
+      var r2 = document.createElement('div'); r2.className = 'navrow';
+      if (back) r2.appendChild(back);
+      r2.appendChild(mk('btn primary', (s.n ? 'Continue ' : 'Back to the Hall ') + ic('next'), function () { enter(s.n || 'h', false); }));
+      A.appendChild(r2);
+    }
+    if (flow) { try { $('card').scrollIntoView({ block: 'start' }); } catch (e) {} }
+  }
+
+  function next() {
+    var bs = beatsOf(SC[G.scene]);
+    if (beat < bs.length - 1) { beat++; G.beat = beat; save(); render(); speak(); }
+  }
+  function prev() {
+    if (beat > 0) { beat--; G.beat = beat; save(); render(); speak(); }
+  }
+  function choose(c) {
+    var out = []; pending = out;
+    if (c.cost) { if (G.coins < c.cost) return; G.coins -= c.cost; out.push({ t: '−' + plural(c.cost, 'Coin'), k: '' }); }
+    applyFx(c.fx, out);
+    var dest = c.to;
+    if (c.chk) {
+      var st = c.chk[0], ok = G[st] >= c.chk[1];
+      if (ok) {
+        G.pass = (G.pass || 0) + 1; if (G.pass >= 8) unlock('check8');
+        out.push({ t: SN[st] + ' check: Passed!', k: 'good' }); dest = c.chk[2];
+      } else {
+        out.push({ t: SN[st] + ' check: Not quite', k: 'bad' }); dest = c.chk[3];
+      }
+    }
+    nap(out);
+    if (dest === '__title') { save(); toTitle(); return; }
+    enter(dest, false);
+  }
+
+  function speak() {
+    if (!cfg.read || !G) return;
+    try {
+      var synth = window.speechSynthesis; synth.cancel();
+      var l = split(sub(beatsOf(SC[G.scene])[beat] || ''));
+      var u = new SpeechSynthesisUtterance(l.who ? l.who + ' says. ' + l.text : l.text);
+      u.rate = 0.92; synth.speak(u);
+    } catch (e) {}
+  }
+
+  /* ----- menu sheet ----- */
+  function openSheet(t) {
+    tab = t || 'hero'; armedReset = false;
+    $('sheet').hidden = false; document.body.style.overflow = 'hidden';
+    renderSheet();
+    try { $('sheet').scrollTop = 0; } catch (e) {}
+  }
+  function closeSheet() { $('sheet').hidden = true; document.body.style.overflow = ''; armedReset = false; }
+
+  function renderSheet() {
+    document.querySelectorAll('.tab').forEach(function (t) { t.setAttribute('aria-selected', t.getAttribute('data-tab') === tab ? 'true' : 'false'); });
+    var h = '';
+    if (tab === 'hero' && G) {
+      h += '<div class="row"><span>' + esc(G.name) + '</span><span class="meta">Your hero</span></div>';
+      STATS.forEach(function (s) {
+        var p = ''; for (var i = 1; i <= MAXSTAT; i++) p += '<span class="pip' + (i <= G[s] ? ' on' : '') + '"></span>';
+        h += '<div class="row"><span>' + SN[s] + '</span><span class="pips" aria-label="' + G[s] + ' out of ' + MAXSTAT + '">' + p + '</span></div>';
+      });
+      h += '<div class="row"><span>Hearts</span><span class="meta">' + G.hp + ' of ' + MAXHP + '</span></div>';
+      h += '<div class="row"><span>Coins</span><span class="meta">' + G.coins + '</span></div>';
+      h += '<div class="row"><span>Story Stars</span><span class="meta">' + starCount(G.book || 1) + ' of 4 in Book ' + (G.book === 2 ? 'Two' : 'One') + '</span></div>';
+      h += '<p class="fine">Powers help you pass checks. If a check is too hard, nothing bad happens. You just lose a heart.</p>';
+    } else if (tab === 'trophies' && G) {
+      var total = ACHORDER.length, n = Object.keys(G.ach).length;
+      h += '<p class="fine" style="margin-top:0">' + n + ' of ' + total + ' trophies found</p>';
+      ACHORDER.forEach(function (id) {
+        if (G.ach[id]) h += '<div class="tro"><span class="ti">' + ic('cup') + '</span><b>' + esc(ACH[id].t) + '</b><span>' + esc(ACH[id].d) + '</span></div>';
+        else h += '<div class="tro lock"><span class="ti">' + ic('cup') + '</span><b>???</b><span>A silly trophy is hiding somewhere.</span></div>';
+      });
+    } else if (tab === 'settings') {
+      h += '<div class="row"><span>Text size<br><span class="meta">' + SIZE_NAMES[cfg.size] + '</span></span><span class="seg"><button class="btn small" data-act="size-" type="button" aria-label="Smaller text"' + (cfg.size === 0 ? ' disabled' : '') + '>A−</button><button class="btn small" data-act="size+" type="button" aria-label="Bigger text"' + (cfg.size === SIZES.length - 1 ? ' disabled' : '') + '>A+</button></span></div>';
+      h += '<div class="row"><span>Colors</span><span class="seg">';
+      [['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']].forEach(function (o) {
+        h += '<button class="btn small' + (cfg.theme === o[0] ? ' primary' : '') + '" data-act="theme:' + o[0] + '" type="button" aria-pressed="' + (cfg.theme === o[0]) + '">' + o[1] + '</button>';
+      });
+      h += '</span></div>';
+      h += '<div class="row"><span>Read to me<br><span class="meta">Uses your device voice</span></span><button class="btn small' + (cfg.read ? ' primary' : '') + '" data-act="read" type="button" aria-pressed="' + cfg.read + '">' + (cfg.read ? 'On' : 'Off') + '</button></div>';
+      h += '<div class="stack" style="margin-top:22px"><button class="btn" data-act="title" type="button">Back to the title ' + ic('next') + '</button>';
+      h += '<button class="btn" data-act="reset" type="button">' + (armedReset ? '<span class="warn">Tap again to erase everything</span>' : 'Start over') + '</button></div>';
+      h += '<p class="fine">Your place is saved automatically after every page.</p>';
+    }
+    $('sheetBody').innerHTML = h;
+  }
+
+  /* ----- wiring ----- */
+  function begin() {
+    var name = $('nameInput').value.replace(/\s+/g, ' ').trim();
+    G = fresh(name); pending = []; curArt = null;
+    save(); enter('a1', false);
+  }
+  function init() {
+    var c = lsGet(SKEY);
+    if (c) { if (typeof c.size === 'number' && SIZES[c.size]) cfg.size = c.size; if (c.theme) cfg.theme = c.theme; cfg.read = !!c.read; }
+    applyCfg();
+    $('txt').setAttribute('aria-live', 'polite');
+
+    $('btnNew').addEventListener('click', function () {
+      $('replaceWarn').hidden = !lsGet(KEY);
+      show('namescr');
+      try { $('nameInput').focus(); } catch (e) {}
+    });
+    $('btnContinue').addEventListener('click', function () {
+      var s = lsGet(KEY); if (!s) return;
+      G = s; G.stars = G.stars || {}; G.flags = G.flags || {}; G.ach = G.ach || {};
+      pending = []; curArt = null; enter(G.scene, true);
+    });
+    $('tsMinus').addEventListener('click', function () { cfg.size = Math.max(0, cfg.size - 1); lsSet(SKEY, cfg); applyCfg(); refreshTs(); });
+    $('tsPlus').addEventListener('click', function () { cfg.size = Math.min(SIZES.length - 1, cfg.size + 1); lsSet(SKEY, cfg); applyCfg(); refreshTs(); });
+    $('btnBegin').addEventListener('click', begin);
+    $('btnNameBack').addEventListener('click', toTitle);
+    $('nameInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') begin(); });
+    $('menuBtn').addEventListener('click', function () { openSheet('hero'); });
+    $('sheetClose').addEventListener('click', closeSheet);
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.addEventListener('click', function () { tab = t.getAttribute('data-tab'); armedReset = false; renderSheet(); });
+    });
+    $('sheetBody').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+      var a = b.getAttribute('data-act');
+      if (a === 'size-') cfg.size = Math.max(0, cfg.size - 1);
+      else if (a === 'size+') cfg.size = Math.min(SIZES.length - 1, cfg.size + 1);
+      else if (a.indexOf('theme:') === 0) cfg.theme = a.slice(6);
+      else if (a === 'read') { cfg.read = !cfg.read; if (cfg.read) speak(); else { try { window.speechSynthesis.cancel(); } catch (x) {} } }
+      else if (a === 'title') { closeSheet(); toTitle(); return; }
+      else if (a === 'reset') {
+        if (!armedReset) { armedReset = true; renderSheet(); return; }
+        lsDel(KEY); G = null; closeSheet(); toTitle(); return;
+      }
+      lsSet(SKEY, cfg); applyCfg(); renderSheet();
+    });
+    $('card').addEventListener('click', function () { if (screen === 'game' && G) next(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !$('sheet').hidden) { closeSheet(); return; }
+      if (screen !== 'game' || !$('sheet').hidden || !G) return;
+      if (e.target && e.target.tagName === 'INPUT') return;
+      if (e.key === 'ArrowRight') next();
+      else if (e.key === 'ArrowLeft') prev();
+    });
+    toTitle();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
+
